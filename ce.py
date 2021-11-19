@@ -1,0 +1,10 @@
+import pandas as pd
+
+data = pd.read_excel('18_11.xls')
+mask = data['Общая стоимость со скидкой'] > 25000
+s = data.groupby('Клиент')['Общая стоимость со скидкой'].sum().sort_values(ascending=False)
+# print(s)
+print(data[mask])
+s.to_csv('out.csv')
+print('проверка')
+# data[mask].to_csv('out.csv')
