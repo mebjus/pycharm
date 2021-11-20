@@ -2,6 +2,8 @@
 Компьютер сам загадывает и сам угадывает число
 """
 import numpy as np
+
+
 def random_predict(number, N=100) -> int:
     """Рандомно угадываем число
     Args:
@@ -13,14 +15,16 @@ def random_predict(number, N=100) -> int:
     a, b = 1, N + 1
     while True:
         count += 1
-        predict_number = int(np.mean([a,b]))
+        predict_number = int(np.mean([a, b]))
         if number > predict_number:
             a = predict_number
         elif number < predict_number:
             b = predict_number
         elif number == predict_number:
-           break  # выход из цикла если угадали
+            break  # выход из цикла если угадали
     return count
+
+
 def score_game(N=100, M=1000) -> int:
     """За какое количство попыток в среднем за 1000 подходов угадывает наш алгоритм
     Args:
@@ -36,6 +40,12 @@ def score_game(N=100, M=1000) -> int:
     score = int(np.mean(count_ls))
     print(f"Ваш алгоритм угадывает число в среднем за:{score} попыток")
     return score
+
+
 if __name__ == "__main__":
     # RUN
-    score_game(6, 5)
+    # запускаем с параметрами: первый N - диапазон рандомных чисел
+    # второй параметр M - количество попыток угадывания
+    # по умолчанию: N = 100, M = 1000
+
+    score_game()
