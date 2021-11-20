@@ -8,7 +8,7 @@ def random_predict(number, N=100) -> int:
     """Рандомно угадываем число
     Args:
         number (int, optional): Загаданное число. Defaults to 1.
-    Returns:
+    Return
         int: Число попыток
     """
     count = 0
