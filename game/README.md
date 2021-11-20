@@ -3,12 +3,12 @@
 ------
 
 ## Оглавление  
-[1. Описание проекта](.README.md#Описание-проекта)  
-[2. Какой кейс решаем?](.README.md#Какой-кейс-решаем)  
+[1. Описание проекта](https://github.com/mebjus/SkillFactory/tree/main/game/README.md#Описание-проекта)  
+[2. Какой кейс решаем?](https://github.com/mebjus/SkillFactory/tree/main/game/README.md#Какой-кейс-решаем)  
 [3. Краткая информация о данных](https://github.com/mebjus/SkillFactory/tree/main/game/README.md#Краткая-информация-о-данных)  
-[4. Этапы работы над проектом](.README.md#Этапы-работы-над-проектом)  
-[5. Результат](.README.md#Результат)    
-[6. Выводы](.README.md#Выводы) 
+[4. Этапы работы над проектом](https://github.com/mebjus/SkillFactory/tree/main/game/README.md#Этапы-работы-над-проектом)  
+[5. Результат](https://github.com/mebjus/SkillFactory/tree/main/game/README.md#Результат)    
+[6. Выводы](https://github.com/mebjus/SkillFactory/tree/main/game/README.md#Выводы) 
 
 ### Описание проекта    
 Угадать загаданное компьютером число за минимальное число попыток.
