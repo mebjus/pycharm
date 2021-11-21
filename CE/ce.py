@@ -9,3 +9,4 @@ s.to_csv('out.csv')
 print('проверка')
 # data[mask].to_csv('out.csv')
 # надо проверить как работает
+# или нет
