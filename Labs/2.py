@@ -28,6 +28,6 @@ import numpy as np
 # print(scienceyou.loc[2019]['Income'])
 # # print(get_profit(scienceyou, 2019))
 
-melb_data = pd.read_csv('C:\\temp\SkillFactory\Labs\data\melb_data.csv', sep=',')
+melb_data = pd.read_csv('data/melb_data.csv', sep=',')
 # print(melb_data.iloc[3521]['Landsize']/melb_data.iloc[1690]['Landsize'])
-print(melb_data['Type'].value_counts(normalize=True))
+print(melb_data[(melb_data['Type'] == 'h') & (melb_data['Price'] < 3000000)]['Regionname'].mode())

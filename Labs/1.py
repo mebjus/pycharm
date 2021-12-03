@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 # a=np.int8(25)
 # # print(np.iinfo(np.int64))
@@ -69,16 +70,16 @@ import numpy as np
 
 # array = np.random.randint(1,101, size=(num,5,5))
 
-def get_unique_loto(num):
-    sample = np.arange(1, 101)
-    arr=np.array([], dtype=np.int16)
-    for i in range(num):
-        a = np.random.choice(sample, size=(5,5), replace=False)
-        arr = np.append(arr, a)
-    arr.shape=(num, 5, 5)
-    return print(arr)
-
-get_unique_loto(2)
+# def get_unique_loto(num):
+#     sample = np.arange(1, 101)
+#     arr=np.array([], dtype=np.int16)
+#     for i in range(num):
+#         a = np.random.choice(sample, size=(5,5), replace=False)
+#         arr = np.append(arr, a)
+#     arr.shape=(num, 5, 5)
+#     return print(arr)
+#
+# get_unique_loto(2)
 
 # def get_unique_loto(num):
 #     sample = np.arange(1, 101)
@@ -88,4 +89,11 @@ get_unique_loto(2)
 #     res = np.array(res)
 #     return res
 
-print(np.mean([19, 242, 14, 152, 142, 1000]))
+
+print(pd.__name__)
+countries = pd.Series(
+    data = ['Англия', 'Канада', 'США', 'Россия', 'Украина', 'Беларусь', 'Казахстан'],
+    index = ['UK', 'CA', 'US', 'RU', 'UA', 'BY', 'KZ'],
+    name = 'countries'
+)
+display(countries)
