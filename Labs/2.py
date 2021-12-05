@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
 # def create_companyDF(income, expenses, years):
 #     """
 #     Создайте функцию create_companyDF(income, expenses, years), которая  возвращает DataFrame, 
@@ -11,7 +10,7 @@ import numpy as np
 #     return df
 
 # def get_profit(df, year):
-    
+
 #     """
 #     А также напишите функцию get_profit(df, year), которая возвращает разницу между доходом и расходом, записанных в таблице df, за год year.
 #     Учтите, что если информация за запрашиваемый год не указана в вашей таблице вам необходимо вернуть None. 
@@ -22,12 +21,58 @@ import numpy as np
 # expenses = [156, 130, 270]
 # income = [478, 512, 196]
 # years = [2018, 2019, 2020]
-    
+
 # scienceyou = create_companyDF(income, expenses, years)
 # print(scienceyou)
 # print(scienceyou.loc[2019]['Income'])
 # # print(get_profit(scienceyou, 2019))
 
-melb_data = pd.read_csv('data/melb_data.csv', sep=',')
-# print(melb_data.iloc[3521]['Landsize']/melb_data.iloc[1690]['Landsize'])
-print(melb_data[(melb_data['Type'] == 'h') & (melb_data['Price'] < 3000000)]['Regionname'].mode())
+
+# ufo_data = pd.read_csv('data/ufo.csv', sep=',')
+#
+#
+# ufo_data['Data'] = pd.to_datetime(ufo_data['Time'])
+# data_vision = ufo_data['Data'].dt.date
+# ufo_NV = ufo_data[ufo_data['State'] == 'NV']
+# r = ufo_NV['Data'].diff()
+# r = r.dt.days
+# print(round(r.mean()))
+
+melb_data = pd.read_csv('data/melb_data_ps.csv', sep=',')
+melb_df = melb_data.copy()
+
+melb_df.drop(['index','Coordinates'],axis=1,inplace=True)
+
+melb_df['Date'] = pd.to_datetime(melb_df['Date'])
+
+melb_df['d'] = melb_df['Date'].dt.dayofweek
+# d = melb_df['WeekdaySale'].value_counts()
+# print(melb_df['d'])
+
+def weekday(WeekdaySale):
+    if WeekdaySale == 5 or WeekdaySale == 6:
+        return 1
+    else:
+        return 0
+
+# def get_street_type(address):
+#     exclude_list = ['N', 'S', 'W', 'E']
+#     address_list = address.split(' ')
+#     street_type = address_list[-1]
+#     if street_type in exclude_list:
+#         street_type = address_list[-2]
+#     return street_type
+#
+# street_types = melb_df['Address'].apply(get_street_type)
+# popular_stypes =street_types.value_counts().nlargest(10).index
+
+# melb_df['Weekend'] = melb_df['d'].apply(weekday)
+# k = melb_df[melb_df['Weekend'] == 1]
+# print(k['Price'].mean())
+
+seller = melb_df['SellerG']
+popular_seller = melb_df['SellerG'].value_counts().nlargest(49).index
+melb_df['Pop_seller'] = seller.apply(lambda x: x if x in popular_seller else 'other')
+k = melb_df[melb_df['Pop_seller'] == 'other']['Price'].min()
+l = melb_df[melb_df['Pop_seller'] == 'Nelson']['Price'].min()
+print(round(l/k, 1))
