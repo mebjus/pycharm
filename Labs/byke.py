@@ -19,10 +19,11 @@ byke_df['age'] = byke_df['age'].dt.year - byke_df['birth year']
 byke_df.drop(['birth year'], axis=1, inplace=True)
 g = byke_df['age'] > 60
 
-
 byke_df['start'] = pd.to_datetime(byke_df['starttime'])
 byke_df['stop'] = pd.to_datetime(byke_df['stoptime'])
 byke_df['trip duration'] = byke_df['stop'] - byke_df['start']
+
+
 # print(byke_df['trip duration'].dt.seconds.mean())
 
 def is_weekend(df):
@@ -31,8 +32,12 @@ def is_weekend(df):
     else:
         return 0
 
+
+byke_df['weekend'] = byke_df['start'].dt.weekday.apply(is_weekend)
+print(byke_df['weekend'].value_counts())
+
 def is_time_of_day(df):
-    c=''
+    c = None
     if 0 <= df <= 6:
         c = 'night'
     elif 6 < df <= 12:
@@ -43,11 +48,5 @@ def is_time_of_day(df):
         c = 'evening'
     return c
 
-
-byke_df['a'] = byke_df['start'].dt.weekday
-byke_df['weekend'] = byke_df['a'].apply(is_weekend)
-# print(byke_df['weekend'].value_counts())
-
-byke_df['b'] = byke_df['start'].dt.hour
-byke_df['time_of_day'] = byke_df['b'].apply(is_time_of_day)
+byke_df['time_of_day'] = byke_df['start'].dt.hour.apply(is_time_of_day)
 print(byke_df['time_of_day'].value_counts())
