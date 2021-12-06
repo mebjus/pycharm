@@ -50,3 +50,4 @@ def is_time_of_day(df):
 
 byke_df['time_of_day'] = byke_df['start'].dt.hour.apply(is_time_of_day)
 print(byke_df['time_of_day'].value_counts())
+
