@@ -49,11 +49,11 @@ melb_df['d'] = melb_df['Date'].dt.dayofweek
 # d = melb_df['WeekdaySale'].value_counts()
 # print(melb_df['d'])
 
-def weekday(WeekdaySale):
-    if WeekdaySale == 5 or WeekdaySale == 6:
-        return 1
-    else:
-        return 0
+# def weekday(WeekdaySale):
+#     if WeekdaySale == 5 or WeekdaySale == 6:
+#         return 1
+#     else:
+#         return 0
 
 # def get_street_type(address):
 #     exclude_list = ['N', 'S', 'W', 'E']
@@ -70,9 +70,17 @@ def weekday(WeekdaySale):
 # k = melb_df[melb_df['Weekend'] == 1]
 # print(k['Price'].mean())
 
-seller = melb_df['SellerG']
-popular_seller = melb_df['SellerG'].value_counts().nlargest(49).index
-melb_df['Pop_seller'] = seller.apply(lambda x: x if x in popular_seller else 'other')
-k = melb_df[melb_df['Pop_seller'] == 'other']['Price'].min()
-l = melb_df[melb_df['Pop_seller'] == 'Nelson']['Price'].min()
-print(round(l/k, 1))
+# seller = melb_df['SellerG']
+# popular_seller = melb_df['SellerG'].value_counts().nlargest(49).index
+# melb_df['Pop_seller'] = seller.apply(lambda x: x if x in popular_seller else 'other')
+# k = melb_df[melb_df['Pop_seller'] == 'other']['Price'].min()
+# l = melb_df[melb_df['Pop_seller'] == 'Nelson']['Price'].min()
+# print(round(l/k, 1))
+
+
+# memory usage: 2.3+ MB
+suburb = melb_df['Suburb']
+popular_suburb = melb_df['Suburb'].value_counts().nlargest(119).index
+melb_df['Suburb'] = suburb.apply(lambda x: x if x in popular_suburb else 'other')
+melb_df['Suburb'] = melb_df['Suburb'].astype('category')
+print(melb_df.info())
