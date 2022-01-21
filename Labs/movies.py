@@ -65,10 +65,27 @@ def get_year_release(arg):
         #если год не указан, возвращаем None
         return None
 
-# ratings['year'] = ratings['title'].apply(get_year_release)
+
+ratings['year'] = ratings['title'].apply(get_year_release)
 # print(ratings['year'].info)
 
 ratings['year'] = ratings['title'].apply(get_year_release)
-#  userId   movieId    rating  date    title   genres
-mask = ratings['year'] == 1999
-print(ratings[mask].groupby(by='title')['rating'].mean().sort_values())
+# #  userId   movieId    rating  date    title   genres   year
+# mask = ratings['year'] == 2018
+# c = (ratings[mask].groupby(by='genres')['rating'].agg(['mean', 'count']))
+# print(c.mean)
+
+# mask = ratings['year'] == 2018
+# grouped = ratings[mask].groupby('genres')['rating'].agg(['mean', 'count'])
+# print(grouped[grouped['count']>10].sort_values(by='mean',ascending=False))
+
+# ratings['year'] = pd.to_datetime(ratings['year'])
+# ratings['year'] = ratings['year'].dt.year
+# ratings['date'] = pd.to_datetime(joined['date'])
+# ratings['year'] = ratings['date'].dt.year
+# pivot = ratings.pivot_table(values='rating', index='year', columns='genres', aggfunc='mean')
+# c = pivot.loc[1996:2019]['Comedy'].sort_values()
+# print(c)
+
+orders = pd.read_csv('data/orders.csv', sep=',')
+products = pd.read_csv('data/products.csv', sep=',')
