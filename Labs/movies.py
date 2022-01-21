@@ -1,17 +1,74 @@
 import pandas as pd
 
-movie = pd.read_csv('C:\\temp\SkillFactory\Labs\data\movies.csv', sep=',')
-rating = pd.read_csv('C:\\temp\SkillFactory\Labs\data\\ratings1.csv', sep=',')
-rating2 = pd.read_csv('C:\\temp\SkillFactory\Labs\data\\ratings2.csv', sep=',')
-dates = pd.read_csv('C:\\temp\SkillFactory\Labs\data\dates.csv', sep=',')
+movies = pd.read_csv('data/movies.csv', sep=',')
+rating = pd.read_csv('data/ratings1.csv', sep=',')
+rating2 = pd.read_csv('data/ratings2.csv', sep=',')
+dates = pd.read_csv('data/dates.csv', sep=',')
 
-# print(movie.nunique())
+
+# print(movies.nunique())
 # print(rating.nunique())
 # print(pd.to_datetime(dates1['date']).dt.year.mode())
 
 ratings = pd.concat([rating, rating2], ignore_index=True)
 ratings = ratings.drop_duplicates(ignore_index=True)
-# print(ratings)
 
-ratings_dates = pd.concat([ratings, dates], axis = 1)
-print(ratings_dates)
+ratings_dates = pd.concat([ratings, dates], axis=1)
+joined_false = ratings_dates.join(movies, rsuffix='_right', how='inner')
+joined = ratings_dates.join(movies.set_index('movieId'), on='movieId', how='left')
+merged = ratings_dates.merge(movies, on='movieId', how='left')
+# print(joined)
+
+data_1 = pd.DataFrame({'Value': [100, 45, 80],
+                       'Group': [1, 4, 5]},
+                      index=['I0', 'I1', 'I2']
+                      )
+data_2 = pd.DataFrame({'Company': ['Google', 'Amazon', 'Facebook'],
+                       'Add': ['S0', 'S1', 'S7']},
+                      index=['I0', 'I1', 'I3'])
+
+# print(data_1.join(data_2, how='inner'))
+# print(data_1.merge(data_2, how='inner', right_index=True, left_index=True))
+
+# items_df = pd.DataFrame({
+#     'item_id': [417283, 849734, 132223, 573943, 19475, 3294095, 382043, 302948, 100132, 312394],
+#     'vendor': ['Samsung', 'LG', 'Apple', 'Apple', 'LG', 'Apple', 'Samsung', 'Samsung', 'LG', 'ZTE'],
+#     'stock_count': [54, 33, 122, 18, 102, 43, 77, 143, 60, 19]
+# })
+#
+# purchase_df = pd.DataFrame({
+#     'purchase_id': [101, 101, 101, 112, 121, 145, 145, 145, 145, 221],
+#     'item_id': [417283, 849734, 132223, 573943, 19475, 3294095, 382043, 302948, 103845, 100132],
+#     'price': [13900, 5330, 38200, 49990, 9890, 33000, 67500, 34500, 89900, 11400]
+# })
+# print(items_df)
+# print(purchase_df)
+#
+# merged = items_df.merge(purchase_df, how='inner')
+# merged['total'] = merged['stock_count'] * merged['price']
+# income = merged['total'].sum()
+# print(income)
+
+ratings = pd.read_csv('data/ratings_movies.csv', sep=',')
+import re
+def get_year_release(arg):
+    #находим все слова по шаблону "(DDDD)"
+    candidates = re.findall(r'\(\d{4}\)', arg)
+    # проверяем число вхождений
+    if len(candidates) > 0:
+        #если число вхождений больше 0,
+	#очищаем строку от знаков "(" и ")"
+        year = candidates[0].replace('(', '')
+        year = year.replace(')', '')
+        return int(year)
+    else:
+        #если год не указан, возвращаем None
+        return None
+
+# ratings['year'] = ratings['title'].apply(get_year_release)
+# print(ratings['year'].info)
+
+ratings['year'] = ratings['title'].apply(get_year_release)
+#  userId   movieId    rating  date    title   genres
+mask = ratings['year'] == 1999
+print(ratings[mask].groupby(by='title')['rating'].mean().sort_values())

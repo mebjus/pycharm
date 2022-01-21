@@ -40,20 +40,26 @@ import numpy as np
 
 melb_data = pd.read_csv('data/melb_data_ps.csv', sep=',')
 melb_df = melb_data.copy()
-
-melb_df.drop(['index','Coordinates'],axis=1,inplace=True)
+melb_df.drop(['index', 'Coordinates'], axis=1, inplace=True)
+total_rooms = melb_df['Rooms'] + melb_df['Bedroom'] + melb_df['Bathroom']
+melb_df['MeanRoomSquare'] = melb_df['BuildingArea'] / total_rooms
+diff_area = melb_df['BuildingArea'] - melb_df['Landsize']
+sum_area = melb_df['BuildingArea'] + melb_df['Landsize']
+melb_df['AreaRatio'] = diff_area/sum_area
 
 melb_df['Date'] = pd.to_datetime(melb_df['Date'])
+melb_df['AgeBuilding'] = melb_df['Date'].dt.year - melb_df['YearBuilt']
+
 
 melb_df['d'] = melb_df['Date'].dt.dayofweek
-# d = melb_df['WeekdaySale'].value_counts()
-# print(melb_df['d'])
+d = melb_df['d'].value_counts()
 
-# def weekday(WeekdaySale):
-#     if WeekdaySale == 5 or WeekdaySale == 6:
-#         return 1
-#     else:
-#         return 0
+
+def weekday(WeekdaySale):
+    if WeekdaySale == 5 or WeekdaySale == 6:
+        return 1
+    else:
+        return 0
 
 # def get_street_type(address):
 #     exclude_list = ['N', 'S', 'W', 'E']
@@ -66,7 +72,9 @@ melb_df['d'] = melb_df['Date'].dt.dayofweek
 # street_types = melb_df['Address'].apply(get_street_type)
 # popular_stypes =street_types.value_counts().nlargest(10).index
 
-# melb_df['Weekend'] = melb_df['d'].apply(weekday)
+melb_df['Weekend'] = melb_df['d'].apply(weekday)
+print(melb_df['Weekend'].value_counts())
+
 # k = melb_df[melb_df['Weekend'] == 1]
 # print(k['Price'].mean())
 
@@ -79,8 +87,8 @@ melb_df['d'] = melb_df['Date'].dt.dayofweek
 
 
 # memory usage: 2.3+ MB
-suburb = melb_df['Suburb']
-popular_suburb = melb_df['Suburb'].value_counts().nlargest(119).index
-melb_df['Suburb'] = suburb.apply(lambda x: x if x in popular_suburb else 'other')
-melb_df['Suburb'] = melb_df['Suburb'].astype('category')
-print(melb_df.info())
+# suburb = melb_df['Suburb']
+# popular_suburb = melb_df['Suburb'].value_counts().nlargest(119).index
+# melb_df['Suburb'] = suburb.apply(lambda x: x if x in popular_suburb else 'other')
+# melb_df['Suburb'] = melb_df['Suburb'].astype('category')
+# print(melb_df.info())

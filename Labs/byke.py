@@ -1,6 +1,6 @@
 import pandas as pd
 
-byke = pd.read_csv('C:\\temp\SkillFactory\Labs\data\citibike-tripdata.csv', sep=',')
+byke = pd.read_csv('data/citibike-tripdata.csv', sep=',')
 byke_df = byke.copy()
 # g = byke_df['start station id'].value_counts() #759
 # g1 = byke_df['end station id'].value_counts() #765
