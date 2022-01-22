@@ -87,5 +87,13 @@ ratings['year'] = ratings['title'].apply(get_year_release)
 # c = pivot.loc[1996:2019]['Comedy'].sort_values()
 # print(c)
 
-orders = pd.read_csv('data/orders.csv', sep=',')
-products = pd.read_csv('data/products.csv', sep=',')
+orders = pd.read_csv('data/orders.csv', sep=';', header=1, names=['data','order ID', 'ID buyer', 'status', 'pay', 'cancel', 'otgruzhen', 'Product_ID', 'count'])
+products = pd.read_csv('data/products.csv', sep=';')
+# print(orders)
+# Product_ID;Name;Price;CURRENCY    Дата создания;Order ID;ID Покупателя;Статус;Оплачен;Отменен;Отгружен;ID товара;Количество
+
+orders_products = orders.merge(products, on='Product_ID',how='left')
+# print(orders_products[orders_products['cancel'] == 'Да']['Name'])
+
+orders_products['Profit'] = orders_products['Price'] * orders_products['count']
+print(orders_products[orders_products['pay'] == 'Да'].groupby('ID buyer')['Profit'].sum().sort_values(ascending=False))
