@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 covid_data = pd.read_csv('data/covid/covid_data.csv')
 vaccinations_data = pd.read_csv('data/covid/country_vaccinations.csv')
@@ -33,4 +34,7 @@ covid_df['recover_rate'] = (covid_df['recovered'] / covid_df['confirmed']) * 100
 c = covid_df[covid_df['country'] == 'United States'].groupby('country')['death_rate'].max()
 # print(round(c, 2))
 russia = covid_df[covid_df['country'] == 'Russia'].groupby('country')['recover_rate'].mean()
-# print(round(russia, 2))
+print(round(russia, 2))
+grouped_cases = covid_df.groupby('date')['daily_confirmed'].sum()
+grouped_cases.plot(kind='line', figsize=(12, 4), title='Ежедневная заболеваемость по всем странам', grid=True, lw=3)
+plt.show()
