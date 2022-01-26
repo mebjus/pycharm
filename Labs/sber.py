@@ -27,20 +27,28 @@ cols_with_null.plot(
     figsize=(10, 4),
     title='Распределение пропусков в данных'
 )
-fill_data = sber_data.copy()
+combine_data = sber_data.copy()
 
+#отбрасываем столбцы с числом пропусков более 30% (100-70)
+n = combine_data.shape[0] #число строк в таблице
+thresh = n*0.7
+combine_data = combine_data.dropna(how='any', thresh=thresh, axis=1)
+
+#отбрасываем строки с числом пропусков более 2 в строке
+m = combine_data.shape[1] #число признаков после удаления столбцов
+combine_data = combine_data.dropna(how='any', thresh=m-2, axis=0)
+
+#создаём словарь 'имя_столбца': число (признак), на который надо заменить пропуски
 values = {
-    'life_sq': fill_data['full_sq'],
-    'metro_min_walk': fill_data['metro_min_walk'].median(),
-    'metro_km_walk': fill_data['metro_km_walk'].median(),
-    'railroad_station_walk_km': fill_data['railroad_station_walk_km'].median(),
-    'railroad_station_walk_min': fill_data['railroad_station_walk_min'].median(),
-    'hospital_beds_raion': fill_data['hospital_beds_raion'].mode()[0],
-    'preschool_quota': fill_data['preschool_quota'].mode()[0],
-    'school_quota': fill_data['school_quota'].mode()[0],
-    'floor': fill_data['floor'].mode()[0]
+    'life_sq': combine_data['full_sq'],
+    'metro_min_walk': combine_data['metro_min_walk'].median(),
+    'metro_km_walk': combine_data['metro_km_walk'].median(),
+    'railroad_station_walk_km': combine_data['railroad_station_walk_km'].median(),
+    'railroad_station_walk_min': combine_data['railroad_station_walk_min'].median(),
+    'preschool_quota': combine_data['preschool_quota'].mode()[0],
+    'school_quota': combine_data['school_quota'].mode()[0],
+    'floor': combine_data['floor'].mode()[0]
 }
-
-fill_data = fill_data.fillna(values)
-
+#заполняем оставшиеся записи константами в соответствии со словарем values
+combine_data = combine_data.fillna(values)
 plt.show()
