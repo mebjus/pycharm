@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly
 import plotly.express as px
+import seaborn as sns
+
 
 
 covid_data = pd.read_csv('data/covid/covid_data.csv')
@@ -101,11 +103,29 @@ choropleth_data['date'] = choropleth_data['date'].astype('string')
 # # отображаем график
 # fig.show()
 
-x = np.linspace(0, 10, 50)
-y1 = x
-y2 = [i**2 for i in x]
-plt.title('Зависимости: y1 = x, y2 = x^2') # заголовок
-plt.xlabel('x') # ось абсцисс
-plt.ylabel('y1, y2') # ось ординат
-plt.grid() # включение отображения сетки
-plt.plot(x, y1)
+# fig, ax = plt.subplots()
+# offset=0.4
+# data = np.array([[5, 10, 7], [8, 15, 5], [11, 9, 7]])
+# cmap = plt.get_cmap('tab20b')
+# b_colors = cmap(np.array([0, 8, 12]))
+# sm_colors = cmap(np.array([1, 2, 3, 9, 10, 11, 13, 14, 15]))
+# ax.pie(data.sum(axis=1), radius=1, colors=b_colors,
+# wedgeprops=dict(width=offset, edgecolor='w'))
+# ax.pie(data.flatten(), radius=1-offset, colors=sm_colors,
+# wedgeprops=dict(width=offset, edgecolor='w'))
+
+
+sns.set_style("darkgrid")
+np.random.seed(123)
+
+sample = [i for i in range(10)]
+y = np.random.randint(10, size=len(sample))
+z = np.random.randint(4, size=len(sample))
+data = [sample, y, z]
+
+
+df = pd.DataFrame(data).transpose()
+df.columns = ['sample', 'y_val', 'z_val']
+sns.lineplot(data=df)
+
+plt.show()
