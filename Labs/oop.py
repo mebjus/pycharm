@@ -78,30 +78,74 @@
 
 import statistics
 
-class IntDataFrame():
-    def __init__(self, lst):
-        # Инициализируем атрибуты
-        self.lst = lst
-        self.round_d()
+import pickle
+from datetime import datetime
+from os import path
 
-    def round_d(self):
-        self.lst = [int(value) for value in self.lst]
+class Dumper():
+    def __init__(self, archive_dir="archive/"):
+        self.archive_dir = archive_dir
 
-    def count(self):
-        c=0
-        for i in self.lst:
-            if i != 0:
-                c += 1
-        return c
+    def dump(self, data):
+        # Библиотека pickle позволяет доставать и класть объекты в файл
+        with open(self.get_file_name(), 'wb') as file:
+            pickle.dump(data, file)
 
-    def unique(self):
-        c=[]
-        for i in self.lst:
-            if i not in c:
-                c.append(i)
-        return len(set(c))
+    def load_for_day(self, day):
+        file_name = path.join(self.archive_dir, day + ".pkl")
+        with open(file_name, 'rb') as file:
+            sets = pickle.load(file)
+        return sets
 
-df = IntDataFrame([4.7, 4, 3, 0, 2.4, 0.3, 4])
-print(df.count())
-print(df.unique())
-##
+    # возвращает корректное имя для файла
+    def get_file_name(self):
+        today = datetime.now().strftime("%y-%m-%d")
+        return path.join(self.archive_dir, today + ".pkl")
+
+
+
+class OwnLogger():
+    def __init__(self):
+        self.buffer = {} #буфер, в котором хранятся сообщения
+
+    def log(self, message, level):
+        self.buffer[level] = message
+        self.buffer['all'] = message
+
+    def show_last(self, level='all'):
+        if level in self.buffer:
+            return self.buffer[level]
+        else:
+            return None
+
+
+data = {
+    'perfomance': [10, 20, 10],
+    'clients': {"Romashka": 10, "Vector": 34}
+}
+
+
+dumper = Dumper()
+dumper.dump(data)
+
+# Восстановим для сегодняшней даты
+file_name = datetime.now().strftime("%y-%m-%d")
+restored_data = dumper.load_for_day(file_name)
+##########
+logger = OwnLogger()
+logger.log("System started", "info")
+logger.show_last("error")
+# => None
+# Некоторые интерпретаторы Python могут не выводить None, тогда в этой проверке у вас будет пустая строка
+logger.log("Connection instable", "warning")
+logger.log("Connection lost", "error")
+
+logger.show_last()
+# => Connection lost
+logger.show_last("info")
+# => System started
+
+import os
+start_path = os.getcwd()
+print(start_path)
+print(os.listdir())

@@ -9,6 +9,6 @@ f = open('data/test.txt', 'r', encoding='utf8')
 print(f.readlines()) # считывает все строки в список и возвращает список
 f.close()
 
-with open("test.txt", 'rb') as f:
+with open("data/test.txt", 'rb') as f:
     a = f.read(10)
     b = f.read(23)
