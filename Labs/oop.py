@@ -145,3 +145,7 @@ logger.show_last()
 logger.show_last("info")
 # => System started
 
+import os
+start_path = os.getcwd()
+print(start_path)
+print(os.listdir())
