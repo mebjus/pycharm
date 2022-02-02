@@ -4,55 +4,46 @@ import seaborn as sns
 
 df = pd.read_excel('/Users/mebjus/SynologyDrive/temp/DispatchesCount_online.xlsx', header=1)
 df_m = pd.read_excel('/Users/mebjus/SynologyDrive/temp/day_of_month.xlsx')
+
 df = df.drop('Unnamed: 7', axis=1)
-df = df.drop('Unnamed: 0', axis=1)
+df = df.fillna(0)
 
-
-for i,j in enumerate(df.iloc[0]): #делаем названия столбцов год-месяц-день
-    y = pd.to_datetime(j)
-    y = y.strftime('%Y-%m')
-    df.iloc[0][i] = y
+for i in range(1, df.shape[0], 4):
+    df.rename(index={i: df.iloc[i][0] + ' шт',
+                     i + 1: df.iloc[i][0] + ' без скидки',
+                     i + 2: df.iloc[i][0] + ' деньги',
+                     i + 3: df.iloc[i][0] + ' кг',
+                     }, inplace=True)
 
 df = df.T
 
-df.rename(columns = {0 : 'месяц',
-                      53 : 'Владивосток, шт',
-                      55 : 'Владивосток, деньги',
-                      56 : 'Владивосток, кг',
+def todate(arg):
+    y = pd.to_datetime(arg)
+    y = y.strftime('%Y-%m')
+    return y
 
-                      65 : 'Волгоград, шт',
-                      67 : 'Волгоград, деньги',
-                      68 : 'Волгоград, кг',
+df[0] = df[0].apply(todate)
 
-                      73 : 'Воронеж, шт',
-                      75 : 'Воронеж, деньги',
-                      76 : 'Воронеж, кг',
+low = df[df['Итого шт'] == 'Итого']
+df = df.drop(low.index, axis=0)
 
-                      189 : 'Москва',
-                      481 : 'РФ, шт',
-                      483 : 'РФ, деньги',
-                      484 : 'РФ, кг',
-                      }, inplace = True)
+df.rename(columns={0: 'Дата'}, inplace=True)
 
-df = df.groupby(['месяц'], as_index=False).sum().round(0)
+df = df.groupby(['Дата'], as_index=False).sum().round(0)
 df = df.merge(df_m, how='left')
-df['РФ, деньги на рд'] = (df['РФ, деньги'] / df['count']).round()
-df['РФ, кг на рд'] = (df['РФ, кг'] / df['count']).round()
 
-df.drop(482,axis=1,inplace = True)
-
-
+df['Итого, деньги на рд'] = (df['Итого деньги'] / df['count']).round()
+df['Итого, кг на рд'] = (df['Итого кг'] / df['count']).round()
+#
 df.to_excel('./summary.xlsx', sheet_name='итоги', index=False)
 
 fig = plt.figure(figsize=(15, 5))
 
 plt.subplot(121)
-sns.lineplot(x = 'месяц', y='РФ, кг на рд', data=df, lw=5)
+sns.lineplot(x = 'Дата', y='Итого, кг на рд', data=df, lw=5)
 plt.xticks(rotation=45)
 
 plt.subplot(122)
-sns.lineplot(x = 'месяц', y='РФ, деньги на рд', data=df, lw=5)
+sns.lineplot(x = 'Дата', y='Итого, деньги на рд', data=df, lw=5)
 plt.xticks(rotation=45)
 plt.show()
-
-# print(df)
