@@ -1,7 +1,7 @@
 import pandas as pd
 import datetime
 
-df = pd.read_csv('DispatchesCount.csv', header=1)
+df = pd.read_csv('data/DispatchesCount.csv', header=1)
 df.columns = ['город', 'дата', 'шт', 'цена паблик', 'цена', 'кг', '1', '2', '3', '4']
 df.drop('1', axis=1, inplace=True)
 df.drop('2', axis=1, inplace=True)

@@ -2,9 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# df = pd.read_excel('/Users/mebjus/SynologyDrive/temp/DispatchesCount_online.xlsx', header=1)
-df = pd.read_csv('/Users/mebjus/SynologyDrive/temp/DispatchesCount.csv', header=1)
-df_m = pd.read_excel('/Users/mebjus/SynologyDrive/temp/day_of_month.xlsx')
+# df = pd.read_excel('data/DispatchesCount_online.xlsx', header=1)
+df = pd.read_csv('data/DispatchesCount.csv', header=1)
+df_m = pd.read_excel('data/day_of_month.xlsx')
 
 df = df.drop('Unnamed: 7', axis=1)
 df = df.fillna(0)

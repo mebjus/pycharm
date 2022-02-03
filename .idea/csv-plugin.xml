@@ -3,14 +3,14 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="/CE/DispatchesCount.csv">
+        <entry key="/CE/out.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/Labs/ExchangeRates.csv">
+        <entry key="/Labs/data/churn.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -45,7 +45,14 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/Labs/data/dst-3.0_16_1_hh_database.csv">
+        <entry key="/Labs/data/melb_data.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/Labs/data/melb_data_fe.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -80,7 +87,28 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/Labs/data/ratings1.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/Labs/data/ratings2.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/Labs/data/ratings_movies.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/Labs/data/ufo.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
