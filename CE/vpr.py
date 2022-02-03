@@ -2,7 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-df = pd.read_excel('/Users/mebjus/SynologyDrive/temp/DispatchesCount_online.xlsx', header=1)
+# df = pd.read_excel('/Users/mebjus/SynologyDrive/temp/DispatchesCount_online.xlsx', header=1)
+df = pd.read_csv('/Users/mebjus/SynologyDrive/temp/DispatchesCount.csv', header=1)
 df_m = pd.read_excel('/Users/mebjus/SynologyDrive/temp/day_of_month.xlsx')
 
 df = df.drop('Unnamed: 7', axis=1)
@@ -22,6 +23,7 @@ def todate(arg):
     y = y.strftime('%Y-%m')
     return y
 
+
 df[0] = df[0].apply(todate)
 
 low = df[df['Итого шт'] == 'Итого']
@@ -33,17 +35,28 @@ df = df.groupby(['Дата'], as_index=False).sum().round(0)
 df = df.merge(df_m, how='left')
 
 df['Итого, деньги на рд'] = (df['Итого деньги'] / df['count']).round()
+df['Итого, шт на рд'] = (df['Итого шт'] / df['count']).round()
 df['Итого, кг на рд'] = (df['Итого кг'] / df['count']).round()
-#
-df.to_excel('./summary.xlsx', sheet_name='итоги', index=False)
 
 fig = plt.figure(figsize=(15, 5))
 
-plt.subplot(121)
+plt.subplot(131)
 sns.lineplot(x = 'Дата', y='Итого, кг на рд', data=df, lw=5)
 plt.xticks(rotation=45)
 
-plt.subplot(122)
+plt.subplot(132)
 sns.lineplot(x = 'Дата', y='Итого, деньги на рд', data=df, lw=5)
 plt.xticks(rotation=45)
+
+plt.subplot(133)
+sns.lineplot(x = 'Дата', y='Итого, шт на рд', data=df, lw=5)
+plt.xticks(rotation=45)
 plt.show()
+
+can = ['Дата', 'Итого шт', 'Итого деньги', 'Итого кг', 'count', 'Итого, деньги на рд', 'Итого, кг на рд',
+       'Итого, шт на рд']
+for i in df.columns:
+    if i not in can:
+        df.drop(i, axis=1, inplace=True)
+
+df.to_excel('./summary.xlsx', sheet_name='итоги', index=False)
