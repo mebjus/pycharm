@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas import DataFrame
 
 melb_data = pd.read_csv('data/melb_data_fe.csv', sep=',')
 melb_df = melb_data.copy()
@@ -31,7 +32,7 @@ mask = (date1 <= t) & (t <= date2)
 # print(melb_df.groupby(['Rooms', 'Type'])['Price'].mean())
 # print(melb_df.groupby(['Rooms', 'Type'])['Price'].mean().unstack())
 
-pivot = melb_df.pivot_table(values='BuildingArea', index='Type', columns='Rooms', aggfunc='median')
+pivot: DataFrame = melb_df.pivot_table(values='BuildingArea', index='Type', columns='Rooms', aggfunc='median')
 pivot2 = melb_df.pivot_table(values='Price', index='SellerG', columns='Type', aggfunc='mean')
 mask2 = pivot2['unit'].max()
 print(pivot2[pivot2['unit'] == mask2])
