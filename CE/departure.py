@@ -100,9 +100,9 @@ df_pivot = df.pivot_table(index='ФО', columns='Режим доставки', v
 #                            'ПРАЙМ до 18:00', 'ЭКСПРЕСС', 'ЭКСПРЕСС Лайт']:
 #         df_pivot.drop(i, axis=1, inplace=True)
 
-# for i in df['Режим доставки']:
-#     if i.find('ЭКСПРЕСС') != -1:
-#         print(i)
+for i in df['Режим доставки']:
+    if i.find('ЭКСПРЕСС') != -1:
+        print(i)
 
 
 df_pivot.to_excel('data/summary.xlsx', sheet_name='итоги')
