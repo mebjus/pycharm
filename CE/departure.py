@@ -105,6 +105,6 @@ df_pivot = df.pivot_table(index='ФО', columns='Режим доставки', v
 #         print(i)
 
 
-# df_pivot.to_excel('data/summary.xlsx', sheet_name='итоги')
+df_pivot.to_excel('data/summary.xlsx', sheet_name='итоги')
 
 print(df_pivot)
