@@ -10,7 +10,7 @@ dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.0F}'.format
 
-n = 500 ## количество строк из каждого месяца  nrows: Any = None,
+n = 500  ## количество строк из каждого месяца  nrows: Any = None,
 
 for file in fullpaths:
     if df.empty:
@@ -20,7 +20,6 @@ for file in fullpaths:
         df1 = pd.read_excel(file, header=2, sheet_name=None)
         df1 = pd.concat(df1, axis=0).reset_index(drop=True)
         df = pd.concat([df, df1], axis=0)
-
 
 dupl = list(df.columns)
 df_dupl = df[df.duplicated(subset=dupl)]
@@ -141,6 +140,10 @@ df_pivot = df_pivot.fillna(1)
 
 set_weihht = ['100+', '30-100', '5-30', '1-5', '0-1']
 
+### откуда куда крупный груз
+df1 = df[df['Группа вес'] == '100+'][
+    ['Дата Cоздания', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'ФО']].reset_index()
+
 for i in set_weihht:
     ll = []
     for j in range(0, df_pivot.shape[0]):
@@ -153,24 +156,36 @@ for i in set_weihht:
         ll.append((df_pivot.iloc[j]['Общая стоимость со скидкой'][i]) / (df_pivot.iloc[j]['Номер отправления'][i]))
     df_pivot.insert(loc=int(0), column=str('Средний ЧЕК ' + i), value=ll, allow_duplicates=False)
 
-
 ####################### сохраняем в файл
 
 writer = pd.ExcelWriter('summary.xlsx', engine='xlsxwriter')
 df_pivot.to_excel(writer, sheet_name='итоги')
+df1.to_excel(writer, sheet_name='>100кг')
 
 workbook = writer.book
 worksheet = writer.sheets['итоги']
+worksheet2 = writer.sheets['>100кг']
 worksheet.add_table(1, 1, df_pivot.shape[0] + 2, 1, {'first_column': True, 'style': None, 'columns':
     [{'header': 'ФО'}]})
+worksheet2.add_table(0, 2, df1.shape[0] , 6, {'first_column': False, 'style': None, 'columns':
+    [{'header': 'Дата'},
+     {'header': 'Номер отправления'},
+     {'header': 'Город отправки'},
+     {'header': 'Город доставки'},
+     {'header': 'ФО'}]})
+
 
 format1 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
 format2 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#FAF8DF', 'num_format': '#,##0'})
 format3 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E0F2F1', 'num_format': '#,##0'})
 
+format4 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1'})
+
 worksheet.set_column('C:H', 10, format1)
 worksheet.set_column('H:M', 10, format2)
 worksheet.set_column('M:AH', 10, format3)
+
+worksheet2.set_column('C:F', 25, format4)
 
 # workbook  = writer.book
 # worksheet = writer.sheets['итоги']
