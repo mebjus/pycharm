@@ -10,12 +10,22 @@ dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.0F}'.format
 
+n = 500 ## количество строк из каждого месяца  nrows: Any = None,
+
 for file in fullpaths:
     if df.empty:
-        df = pd.read_excel(file, header=2)
+        df = pd.read_excel(file, header=2, sheet_name=None)
+        df = pd.concat(df, axis=0).reset_index(drop=True)
     else:
-        df1 = pd.read_excel(file, header=2)
+        df1 = pd.read_excel(file, header=2, sheet_name=None)
+        df1 = pd.concat(df1, axis=0).reset_index(drop=True)
         df = pd.concat([df, df1], axis=0)
+
+
+dupl = list(df.columns)
+df_dupl = df[df.duplicated(subset=dupl)]
+df_dupl.index.nunique()
+df = df.drop_duplicates(subset=dupl)
 
 
 def todate(arg):
@@ -144,7 +154,7 @@ for i in set_weihht:
     df_pivot.insert(loc=int(0), column=str('Средний ЧЕК ' + i), value=ll, allow_duplicates=False)
 
 
-####################### сохраняем в файл +++--
+####################### сохраняем в файл
 
 writer = pd.ExcelWriter('summary.xlsx', engine='xlsxwriter')
 df_pivot.to_excel(writer, sheet_name='итоги')
