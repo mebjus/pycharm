@@ -144,7 +144,7 @@ for i in set_weihht:
     df_pivot.insert(loc=int(0), column=str('Средний ЧЕК ' + i), value=ll, allow_duplicates=False)
 
 
-####################### сохраняем в файл +++
+####################### сохраняем в файл +++--
 
 writer = pd.ExcelWriter('summary.xlsx', engine='xlsxwriter')
 df_pivot.to_excel(writer, sheet_name='итоги')
