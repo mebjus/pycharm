@@ -21,6 +21,9 @@ for file in fullpaths:
         df1 = pd.concat(df1, axis=0).reset_index(drop=True)
         df = pd.concat([df, df1], axis=0)
 
+dirname = './data/day_of_month.xlsx'
+df_m = pd.read_excel(dirname)
+
 dupl = list(df.columns)
 df_dupl = df[df.duplicated(subset=dupl)]
 df_dupl.index.nunique()
@@ -130,7 +133,7 @@ df_pivot = df.pivot_table(index=['Дата Cоздания', 'ФО'], columns=['
                           values=['Номер отправления', 'Общая стоимость со скидкой', 'Расчетный вес'],
                           aggfunc={'Номер отправления': len, 'Общая стоимость со скидкой': sum, 'Расчетный вес': sum})
 ## margins=True
-df_pivot = df_pivot.fillna(1)
+
 # df_pivot.query('ФО == ["ЮФО"]', inplace=True)  ## фильтр по сводному
 
 # print(df_pivot)
@@ -155,6 +158,8 @@ for i in set_weihht:
     for j in range(0, df_pivot.shape[0]):
         ll.append((df_pivot.iloc[j]['Общая стоимость со скидкой'][i]) / (df_pivot.iloc[j]['Номер отправления'][i]))
     df_pivot.insert(loc=int(0), column=str('Средний ЧЕК ' + i), value=ll, allow_duplicates=False)
+
+df_pivot = df_pivot.merge(df_m, left_on='Дата Cоздания', right_on='Дата', how='left')
 
 ####################### сохраняем в файл
 
