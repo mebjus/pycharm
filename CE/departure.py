@@ -82,6 +82,8 @@ def mod(arg):
 df['Режим доставки'] = df['Режим доставки'].apply(mod)
 df['Режим доставки'] = df['Режим доставки'].astype('category')
 
+df = df.merge(df_m, left_on = 'Дата Cоздания', right_on='Дата', how='left')
+
 ######################  рисование  ##############
 
 # money = df.groupby(['ФО'])['Общая стоимость со скидкой'].sum().round()
@@ -132,6 +134,7 @@ df['Режим доставки'] = df['Режим доставки'].astype('ca
 df_pivot = df.pivot_table(index=['Дата Cоздания', 'ФО'], columns=['Группа вес'],
                           values=['Номер отправления', 'Общая стоимость со скидкой', 'Расчетный вес'],
                           aggfunc={'Номер отправления': len, 'Общая стоимость со скидкой': sum, 'Расчетный вес': sum})
+
 ## margins=True
 
 # df_pivot.query('ФО == ["ЮФО"]', inplace=True)  ## фильтр по сводному
@@ -159,7 +162,6 @@ for i in set_weihht:
         ll.append((df_pivot.iloc[j]['Общая стоимость со скидкой'][i]) / (df_pivot.iloc[j]['Номер отправления'][i]))
     df_pivot.insert(loc=int(0), column=str('Средний ЧЕК ' + i), value=ll, allow_duplicates=False)
 
-df_pivot = df_pivot.merge(df_m, left_on='Дата Cоздания', right_on='Дата', how='left')
 
 ####################### сохраняем в файл
 
