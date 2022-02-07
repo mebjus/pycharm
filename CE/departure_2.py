@@ -162,6 +162,7 @@ for i in df_pivot.columns.values:
     dic[i] = c
 
 df_pivot.rename(columns=dic, inplace=True)
+
 df_pivot.rename(columns={'р .': 'р.д.'}, inplace=True)
 
 ####################### сохраняем в файл
