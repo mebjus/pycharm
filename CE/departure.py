@@ -14,14 +14,16 @@ n = 500  ## количество строк из каждого месяца  nr
 
 for file in fullpaths:
     if df.empty:
-        df = pd.read_excel(file, header=2, sheet_name=None)
-        df = pd.concat(df, axis=0).reset_index(drop=True)
+        if file.find('.xls') != -1:
+            df = pd.read_excel(file, header=2, sheet_name=None)
+            df = pd.concat(df, axis=0).reset_index(drop=True)
     else:
-        df1 = pd.read_excel(file, header=2, sheet_name=None)
-        df1 = pd.concat(df1, axis=0).reset_index(drop=True)
-        df = pd.concat([df, df1], axis=0)
+        if file.find('.xls') != -1:
+            df1 = pd.read_excel(file, header=2, sheet_name=None)
+            df1 = pd.concat(df1, axis=0).reset_index(drop=True)
+            df = pd.concat([df, df1], axis=0)
 
-dirname = './data/day_of_month.xlsx'
+dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
 
 dupl = list(df.columns)
