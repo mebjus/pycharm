@@ -10,7 +10,6 @@ dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.0F}'.format
 
-
 for file in fullpaths:
     if df.empty:
         if file.find('.xls') != -1:
@@ -85,45 +84,13 @@ df['Режим доставки'] = df['Режим доставки'].astype('ca
 
 df.rename(columns={'Дата Cоздания': 'дата',
                    'Номер отправления': 'шт', 'Общая стоимость со скидкой': 'деньги', 'Расчетный вес': 'вес'},
-                       inplace = True)
-
-######################  рисование  ##############
-
-# money = df.groupby(['ФО'])['деньги'].sum().round()
-# dep = df.groupby(['ФО'])['вес'].sum().round()
-# kg = df.groupby(['ФО'])['шт'].count().round()
-#
-#
-# fig = plt.figure(figsize=(15, 5))
-# colors = sns.color_palette('pastel')[0:7]
-#
-# plt.subplot(131)
-# plt.title('Распределение ФО, деньги')
-# plt.pie(money, labels=money.index, colors=colors, autopct='%.1f%%')
-#
-# plt.subplot(132)
-# plt.title('Распределение количество')
-# plt.pie(dep, labels=dep.index, colors=colors, autopct='%.1f%%')
-#
-# plt.subplot(133)
-# plt.title('Распределение ФО, вес')
-# plt.pie(kg, labels=kg.index, colors=colors, autopct='%.1f%%')
-#
-# plt.show()
+          inplace=True)
 
 
-### ФО по режиму колво
-
-# df_pivot = df.pivot_table(index='ФО', columns='Режим доставки', values='шт', aggfunc='count')
-
-
-######################  по дате по округам, весовой брейк вес штуки
-
-df_pivot = df.pivot_table(index=['дата', 'ФО'], columns=['Группа вес'],
-                          values=['шт', 'вес', 'деньги'],
-                          aggfunc={'шт': len, 'вес': sum, 'деньги': sum})
+df_pivot = df.pivot_table(index=['дата', 'ФО'], columns='Режим доставки', values=['шт', 'деньги'],
+                          aggfunc={'шт': len, 'деньги': sum})
 # margins=True,
-########, средний чек, вес, кг по весовым грейдам
+
 
 df_pivot = df_pivot.reset_index()
 df_pivot = df_pivot.merge(df_m, left_on='дата', right_on='Дата', how='left')
@@ -134,13 +101,6 @@ df1 = df[df['Группа вес'] == '100+'][
      'Клиент']].reset_index()
 df1.drop(columns=['index'], axis=1, inplace=True)
 
-set_weight = ['0-1', '1-5', '5-30', '30-100', '100+']
-
-for i in set_weight:
-    df_pivot[('Средний КГ ', i)] = df_pivot[('деньги', i)] / df_pivot[('вес', i)]
-for i in set_weight:
-    df_pivot[('Средний ЧЕК ', i)] = df_pivot[('деньги', i)] / df_pivot[('шт', i)]
-
 dic = {}
 for i in df_pivot.columns.values:
     c = str(i[0] + ' ' + i[1]).strip()
@@ -149,55 +109,82 @@ for i in df_pivot.columns.values:
 df_pivot.rename(columns=dic, inplace=True)
 df_pivot.rename(columns={'р .': 'р.д.'}, inplace=True)
 
-
 ########### фильтр на округ
 
-df_pivot = df_pivot.query('ФО == ["СФО"]')  ## фильтр по сводному
+# df_pivot = df_pivot.query('ФО == ["СФО"]')  ## фильтр по сводному
 
 ####################### сохраняем в файл
-
-writer = pd.ExcelWriter('summary.xlsx', engine='xlsxwriter')
-df_pivot.to_excel(writer, sheet_name='итоги', startrow=2, index=False, header=False)  # index=False header=False
-df1.to_excel(writer, sheet_name='>100кг', index=False)
-
-workbook = writer.book
-worksheet = writer.sheets['итоги']
-worksheet2 = writer.sheets['>100кг']
-worksheet.add_table(1, 0, df_pivot.shape[0] + 1, 1, {'first_column': False, 'style': None, 'columns':
-    [{'header': 'Дата'},
-     {'header': 'ФО'}]})
-worksheet2.add_table(0, 0, df1.shape[0], 5, {'first_column': False, 'style': None, 'columns':
-    [{'header': 'Дата'},
-     {'header': 'шт'},
-     {'header': 'Город отправки'},
-     {'header': 'Город доставки'},
-     {'header': 'ФО'},
-     {'header': 'Клиент'}]})
-
-format1 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
-format2 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#FAF8DF', 'num_format': '#,##0'})
-format3 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E0F2F1', 'num_format': '#,##0'})
-format4 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1'})
-
-worksheet.set_column('A:H', 14, format1)
-worksheet.set_column('H:M', 14, format2)
-worksheet.set_column('M:AH', 14, format3)
-worksheet2.set_column('A:E', 25, format4)
-worksheet2.set_column('F:F', 60, format4)
-
-workbook = writer.book
-worksheet = writer.sheets['итоги']
 #
-header_format = workbook.add_format({
-    'bold': True,
-    'text_wrap': True,
-    'valign': 'vcenter',
-    'fg_color': '#D7E4BC',
-    'align': 'center_across',
-    'num_format': '#,##0',
-    'border': 1})
+# writer = pd.ExcelWriter('summary_prime.xlsx', engine='xlsxwriter')
+# df_pivot.to_excel(writer, sheet_name='итоги', startrow=2, index=False, header=False)  # index=False header=False
+#
+# workbook = writer.book
+# worksheet = writer.sheets['итоги']
+# # worksheet.add_table(1, 0, df_pivot.shape[0] + 1, 1, {'first_column': False, 'style': None, 'columns':
+# #     [{'header': 'Дата'},
+# #      {'header': 'ФО'}]})
+# # worksheet2.add_table(0, 0, df1.shape[0], 5, {'first_column': False, 'style': None, 'columns':
+# #     [{'header': 'Дата'},
+# #      {'header': 'шт'},
+# #      {'header': 'Город отправки'},
+# #      {'header': 'Город доставки'},
+# #      {'header': 'ФО'},
+# #      {'header': 'Клиент'}]})
+# #
+# # format1 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
+# # format2 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#FAF8DF', 'num_format': '#,##0'})
+# # format3 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E0F2F1', 'num_format': '#,##0'})
+# # format4 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1'})
+#
+# # worksheet.set_column('A:H', 14, format1)
+# # worksheet.set_column('H:M', 14, format2)
+# # worksheet.set_column('M:AH', 14, format3)
+# # worksheet2.set_column('A:E', 25, format4)
+# # worksheet2.set_column('F:F', 60, format4)
+#
+# workbook = writer.book
+# worksheet = writer.sheets['итоги']
+# #
+# header_format = workbook.add_format({
+#     'bold': True,
+#     'text_wrap': True,
+#     'valign': 'vcenter',
+#     'fg_color': '#D7E4BC',
+#     'align': 'center_across',
+#     'num_format': '#,##0',
+#     'border': 1})
+#
+# for col_num, value in enumerate(df_pivot.columns.values):
+#     worksheet.write(0, col_num, value, header_format)
+#
+# writer.save()
 
-for col_num, value in enumerate(df_pivot.columns.values):
-    worksheet.write(0, col_num, value, header_format)
+####################  рисование  ##############
 
-writer.save()
+# df_pivot = df.pivot_table(index=['дата', 'ФО'], columns='Режим доставки', values=['шт', 'деньги'],
+#                           aggfunc={'шт': len, 'деньги': sum})
+# margins=True,
+
+money = df.groupby(['ФО'])['деньги'].sum().round()
+dep = df.groupby(['ФО'])['вес'].sum().round()
+kg = df.groupby(['ФО'])['шт'].count().round()
+
+test = df.groupby(['Режим доставки'])['деньги'].sum().round()
+
+
+fig = plt.figure(figsize=(15, 5))
+colors = sns.color_palette('pastel')[0:7]
+
+plt.subplot(131)
+plt.title('Распределение ФО, деньги')
+plt.pie(test, labels=test.index, colors=colors, autopct='%.1f%%')
+
+plt.subplot(132)
+plt.title('Распределение количество')
+plt.pie(dep, labels=dep.index, colors=colors, autopct='%.1f%%')
+
+plt.subplot(133)
+plt.title('Распределение ФО, вес')
+plt.pie(kg, labels=kg.index, colors=colors, autopct='%.1f%%')
+
+plt.show()
