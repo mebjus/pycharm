@@ -5,6 +5,7 @@ import seaborn as sns
 import os
 from pandas.api.types import CategoricalDtype
 
+
 df = pd.DataFrame
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
@@ -110,11 +111,6 @@ df_pivot = df_pivot.reset_index()
 df_pivot = df_pivot.merge(df_m, left_on='дата', right_on='Дата', how='left')
 df_pivot.drop(columns=['Дата'], axis=1, inplace=True)
 
-df1 = df[df['Группа вес'] == '100+'][
-    ['дата', 'шт', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'ФО',
-     'Клиент']].reset_index()
-df1.drop(columns=['index'], axis=1, inplace=True)
-
 dic = {}
 for i in df_pivot.columns.values:
     c = str(i[0] + ' ' + i[1]).strip()
@@ -172,29 +168,3 @@ for col_num, value in enumerate(df_pivot.columns.values):
     worksheet.write(0, col_num, value, header_format)
 
 writer.save()
-
-###################  рисование  ##############
-
-money = df.groupby(['ФО'])['деньги'].sum().round()
-dep = df.groupby(['ФО'])['вес'].sum().round()
-kg = df.groupby(['ФО'])['шт'].count().round()
-
-test = df.groupby(['Режим доставки'])['деньги'].sum().round()
-
-
-fig = plt.figure(figsize=(15, 5))
-colors = sns.color_palette('pastel')[0:7]
-
-plt.subplot(131)
-plt.title('Распределение ФО, деньги')
-plt.pie(money, labels=money.index, colors=colors, autopct='%.1f%%')
-
-plt.subplot(132)
-plt.title('Распределение количество')
-plt.pie(dep, labels=dep.index, colors=colors, autopct='%.1f%%')
-
-plt.subplot(133)
-plt.title('Распределение ФО, вес')
-plt.pie(kg, labels=kg.index, colors=colors, autopct='%.1f%%')
-
-plt.show()

@@ -87,7 +87,7 @@ df.rename(columns={'Дата Cоздания': 'дата',
 df = df[df['деньги'] > 50]
 
 ######################  рисование  ##############
-
+#
 # money = df.groupby(['ФО'])['деньги'].sum().round()
 # dep = df.groupby(['ФО'])['вес'].sum().round()
 # kg = df.groupby(['ФО'])['шт'].count().round()
@@ -109,7 +109,7 @@ df = df[df['деньги'] > 50]
 # plt.pie(kg, labels=kg.index, colors=colors, autopct='%.1f%%')
 #
 # plt.show()
-
+#
 
 ### ФО по режиму колво
 
