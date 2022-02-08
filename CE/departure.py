@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+from pandas.api.types import CategoricalDtype
+
 
 df = pd.DataFrame
 dirname = 'data/kis/'
@@ -62,33 +64,27 @@ def ret(cell):  # столбец и ячейку передаю, возрат - 
 df['ФО'] = df['Заказ.Клиент.Подразделение.Адрес.Город'].apply(ret)
 df['ФО'] = df['ФО'].astype('category')
 
+## установить порядок в списке ФО
+cat_type = CategoricalDtype(categories=['ЦФО', 'СЗФО', 'ПФО', 'ЮФО', 'УФО', 'СФО', 'ДВФО'], ordered=True)
+df['ФО']= df['ФО'].astype(cat_type)
+
 df['Группа вес'] = pd.cut(df['Расчетный вес'], bins=[0, 1, 5, 30, 100, 1000000],
                           labels=['0-1', '1-5', '5-30', '30-100', '100+'], right=False)
 
 df['Группа вес'] = df['Группа вес'].astype('category')
 
+## установить порядок в по весам
+cat_type = CategoricalDtype(categories=['0-1', '1-5', '5-30', '30-100', '100+'], ordered=True)
+df['Группа вес'] = df['Группа вес'].astype(cat_type)
 
-def mod(arg):
-    if arg.find('ЭКСПРЕСС') != -1:
-        return 'ЭКСПРЕСС'
-    elif arg.find('ПРАЙМ') != -1:
-        return 'ПРАЙМ'
-    elif arg.find('ОПТИМА') != -1:
-        return 'ОПТИМА'
-    else:
-        return 'ПРОЧИЕ'
-
-
-df['Режим доставки'] = df['Режим доставки'].apply(mod)
-df['Режим доставки'] = df['Режим доставки'].astype('category')
 
 df.rename(columns={'Дата Cоздания': 'дата',
                    'Номер отправления': 'шт', 'Общая стоимость со скидкой': 'деньги', 'Расчетный вес': 'вес'},
           inplace=True)
 
-df = df[df['деньги'] > 50]  # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
+# отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
-
+df = df[df['деньги'] > 50]
 
 ######################  рисование  ##############
 
@@ -139,11 +135,10 @@ df1 = df[(df['Группа вес'] == '100+') & (df['деньги'] > 0)][
 
 df1.drop(columns=['index'], axis=1, inplace=True)
 
-set_weight = ['0-1', '1-5', '5-30', '30-100', '100+']
 
-for i in set_weight:
+for i in df['Группа вес'].values:
     df_pivot[('Средний КГ ', i)] = df_pivot[('деньги', i)] / df_pivot[('вес', i)]
-for i in set_weight:
+for i in df['Группа вес'].values:
     df_pivot[('Средний ЧЕК ', i)] = df_pivot[('деньги', i)] / df_pivot[('шт', i)]
 
 dic = {}
