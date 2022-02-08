@@ -10,7 +10,6 @@ dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.0F}'.format
 
-
 for file in fullpaths:
     if df.empty:
         if file.find('.xls') != -1:
@@ -85,7 +84,11 @@ df['Режим доставки'] = df['Режим доставки'].astype('ca
 
 df.rename(columns={'Дата Cоздания': 'дата',
                    'Номер отправления': 'шт', 'Общая стоимость со скидкой': 'деньги', 'Расчетный вес': 'вес'},
-                       inplace = True)
+          inplace=True)
+
+df = df[df['деньги'] > 50]  # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
+
+
 
 ######################  рисование  ##############
 
@@ -122,6 +125,7 @@ df.rename(columns={'Дата Cоздания': 'дата',
 df_pivot = df.pivot_table(index=['дата', 'ФО'], columns=['Группа вес'],
                           values=['шт', 'вес', 'деньги'],
                           aggfunc={'шт': len, 'вес': sum, 'деньги': sum})
+
 # margins=True,
 ########, средний чек, вес, кг по весовым грейдам
 
@@ -129,9 +133,10 @@ df_pivot = df_pivot.reset_index()
 df_pivot = df_pivot.merge(df_m, left_on='дата', right_on='Дата', how='left')
 df_pivot.drop(columns=['Дата'], axis=1, inplace=True)
 
-df1 = df[df['Группа вес'] == '100+'][
+df1 = df[(df['Группа вес'] == '100+') & (df['деньги'] > 0)][
     ['дата', 'шт', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'ФО',
-     'Клиент']].reset_index()
+     'деньги', 'Клиент']].reset_index()
+
 df1.drop(columns=['index'], axis=1, inplace=True)
 
 set_weight = ['0-1', '1-5', '5-30', '30-100', '100+']
@@ -149,10 +154,9 @@ for i in df_pivot.columns.values:
 df_pivot.rename(columns=dic, inplace=True)
 df_pivot.rename(columns={'р .': 'р.д.'}, inplace=True)
 
-
 ########### фильтр на округ
 
-df_pivot = df_pivot.query('ФО == ["СФО"]')  ## фильтр по сводному
+# df_pivot = df_pivot.query('ФО == ["СФО"]')  ## фильтр по сводному
 
 ####################### сохраняем в файл
 
@@ -166,27 +170,29 @@ worksheet2 = writer.sheets['>100кг']
 worksheet.add_table(1, 0, df_pivot.shape[0] + 1, 1, {'first_column': False, 'style': None, 'columns':
     [{'header': 'Дата'},
      {'header': 'ФО'}]})
-worksheet2.add_table(0, 0, df1.shape[0], 5, {'first_column': False, 'style': None, 'columns':
+worksheet2.add_table(0, 0, df1.shape[0], 6, {'first_column': False, 'style': None, 'columns':
     [{'header': 'Дата'},
      {'header': 'шт'},
      {'header': 'Город отправки'},
      {'header': 'Город доставки'},
      {'header': 'ФО'},
+     {'header': 'деньги'},
      {'header': 'Клиент'}]})
 
 format1 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
 format2 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#FAF8DF', 'num_format': '#,##0'})
 format3 = workbook.add_format({'align': 'center', 'border': 1, 'bg_color': '#E0F2F1', 'num_format': '#,##0'})
-format4 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1'})
+format4 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
 
 worksheet.set_column('A:H', 14, format1)
 worksheet.set_column('H:M', 14, format2)
 worksheet.set_column('M:AH', 14, format3)
-worksheet2.set_column('A:E', 25, format4)
-worksheet2.set_column('F:F', 60, format4)
+worksheet2.set_column('A:F', 25, format4)
+worksheet2.set_column('G:G', 60, format4)
 
 workbook = writer.book
 worksheet = writer.sheets['итоги']
+worksheet2 = writer.sheets['>100кг']
 #
 header_format = workbook.add_format({
     'bold': True,

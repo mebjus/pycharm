@@ -161,10 +161,6 @@ df_pivot.rename(columns={'р .': 'р.д.'}, inplace=True)
 
 ####################  рисование  ##############
 
-# df_pivot = df.pivot_table(index=['дата', 'ФО'], columns='Режим доставки', values=['шт', 'деньги'],
-#                           aggfunc={'шт': len, 'деньги': sum})
-# margins=True,
-
 money = df.groupby(['ФО'])['деньги'].sum().round()
 dep = df.groupby(['ФО'])['вес'].sum().round()
 kg = df.groupby(['ФО'])['шт'].count().round()
