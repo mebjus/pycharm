@@ -92,6 +92,7 @@ for i in df_pivot.columns.values:
     c = str(i[0] + ' ' + i[1]).strip()
     dic[i] = c
 
+
 df_pivot.rename(columns = dic, inplace = True)
 
 ####################### сохраняем в файл

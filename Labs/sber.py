@@ -122,26 +122,33 @@ def outliers_z_score(data, feature, log_scale=False, left=3, right=3):
 # # histplot.set_title('Log MKAD Km Distribution')
 # plt.show()
 
-dupl_columns = list(sber_data.columns)
-dupl_columns.remove('id')
+# dupl_columns = list(sber_data.columns)
+# dupl_columns.remove('id')
+#
+# mask = sber_data.duplicated(subset=dupl_columns)
+# sber_duplicates = sber_data[mask]
+# sber_dedupped = sber_data.drop_duplicates(subset=dupl_columns)
+# print(f'Результирующее число записей: {sber_dedupped.shape[0]}')
+#
+# low_information_cols = []
+#
+# #цикл по всем столбцам
+# for col in sber_data.columns:
+#     top_freq = sber_data[col].value_counts(normalize=True).max()
+#     nunique_ratio = sber_data[col].nunique() / sber_data[col].count()
+#     if top_freq > 0.95:
+#         low_information_cols.append(col)
+#         print(f'{col}: {round(top_freq*100, 2)}% одинаковых значений')
+#     if nunique_ratio > 0.95:
+#         low_information_cols.append(col)
+#         print(f'{col}: {round(nunique_ratio*100, 2)}% уникальных значений')
+#
+# information_sber_data = sber_data.drop(low_information_cols, axis=1)
+# print(f'Результирующее число признаков: {information_sber_data.shape[1]}')
+#
 
-mask = sber_data.duplicated(subset=dupl_columns)
-sber_duplicates = sber_data[mask]
-sber_dedupped = sber_data.drop_duplicates(subset=dupl_columns)
-print(f'Результирующее число записей: {sber_dedupped.shape[0]}')
-
-low_information_cols = []
-
-#цикл по всем столбцам
-for col in sber_data.columns:
-    top_freq = sber_data[col].value_counts(normalize=True).max()
-    nunique_ratio = sber_data[col].nunique() / sber_data[col].count()
-    if top_freq > 0.95:
-        low_information_cols.append(col)
-        print(f'{col}: {round(top_freq*100, 2)}% одинаковых значений')
-    if nunique_ratio > 0.95:
-        low_information_cols.append(col)
-        print(f'{col}: {round(nunique_ratio*100, 2)}% уникальных значений')
-
-information_sber_data = sber_data.drop(low_information_cols, axis=1)
-print(f'Результирующее число признаков: {information_sber_data.shape[1]}')
+data = pd.read_excel('data/ratings+movies.xlsx')
+print(data)
+data1= pd.read_excel('data/ratings+movies.xlsx', sheet_name='movies')
+data = data.merge(data1, how='left')
+print(data)
