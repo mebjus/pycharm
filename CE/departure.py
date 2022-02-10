@@ -24,6 +24,13 @@ for file in fullpaths:
 
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
+df_m.reset_index()
+mounth={}
+
+
+for i in df_m.index:
+    mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
+
 
 dupl = list(df.columns)
 df_dupl = df[df.duplicated(subset=dupl)]
@@ -124,6 +131,7 @@ df_pivot = df.pivot_table(index=['дата', 'ФО'], columns=['Группа в�
 # margins=True,
 ########, средний чек, вес, кг по весовым грейдам
 
+
 df_pivot = df_pivot.reset_index()
 df_pivot = df_pivot.merge(df_m, left_on='дата', right_on='Дата', how='left')
 df_pivot.drop(columns=['Дата'], axis=1, inplace=True)
@@ -146,6 +154,10 @@ for i in df_pivot.columns.values:
     dic[i] = c
 
 df_pivot.rename(columns=dic, inplace=True)
+
+# df_pivot = df_pivot.reset_index()
+# df_pivot[(' ', 'р.д.')] = df_pivot['дата'].apply(lambda x: mounth[x])
+
 df_pivot.rename(columns={'р .': 'р.д.'}, inplace=True)
 
 ########### фильтр на округ
