@@ -20,6 +20,11 @@ for file in fullpaths:
 
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
+df_m.reset_index()
+mounth = {}
+
+for i in df_m.index:
+    mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
 
 def todate(arg):
@@ -62,29 +67,33 @@ df_cons_dep.rename(columns={'шт': 'номер', 'Клиент': 'количе�
 df_cons_arr.rename(columns={'шт': 'номер', 'Клиент': 'количество'}, inplace=True)
 
 df_cons_dep = df_cons_dep[df_cons_dep['количество'] > 1]
-df_cons_arr = df_cons_arr[df_cons_arr['количество'] > 1]  # >1
+df_cons_arr = df_cons_arr[df_cons_arr['количество'] > 1]
 
-a1 = df_dep.shape[0] + df_arr.shape[0]
-a2 = a1 - df_cons_dep['количество'].sum() + df_cons_dep['номер'].count()
+count_all = df_dep.shape[0] + df_arr.shape[0]
+count_stop = count_all - df_cons_dep['количество'].sum() + df_cons_dep['номер'].count()
 
 # print('Кол отправлений из Москвы или в Москву: {:,.0F}'.format(a1))
 # print('Кол отправлений в Москву из Москвы (вкл в общ): ', df[(mask1 & mask2)].shape[0])
-print('Кол стопов: {:,.0F}'.format(a2))
+print('Кол стопов: {:,.0F}'.format(count_stop))
 
-a3 = df_or['дата'].apply(todate1).reset_index()
-a3 = a3.groupby('дата').sum()
-a3 = a3.merge(df_m, left_on='дата', right_on='Дата', how='left')
+count_rd = df_or['дата'].apply(todate1).reset_index()
+count_rd = count_rd.groupby('дата').sum()
+
+count_rd = count_rd.reset_index()
+count_rd['р.д.'] = count_rd['дата'].apply(lambda x: mounth[x])
+
 
 print('Сумма деньги: {:,.0F}'.format((df_inner['деньги'].sum() + df_or['деньги'].sum())/2))
 print('Расчетный вес: {:,.0F}'.format((df_inner['Расчетный вес'].sum() + df_or['Расчетный вес'].sum())/2))
 
 
-df = pd.Series({'Количество отправлений': a1, 'Количество стопов': a2, 'Количество рд': a3['р.д.'][0]})
+df = pd.Series({'Количество отправлений': count_all, 'Количество стопов': count_stop,
+                'Количество рд': count_rd['р.д.'][0]})
 
-print('Количество рд', a3['р.д.'][0])
+print('Количество рд', count_rd['р.д.'][0])
 
 
-###################### сохраняем в файл
+##################### сохраняем в файл
 
 # writer = pd.ExcelWriter('consolid.xlsx', engine='xlsxwriter')
 #
