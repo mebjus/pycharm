@@ -34,7 +34,7 @@ df = df.drop_duplicates(subset=dupl)
 
 def todate(arg):
     arg = pd.to_datetime(arg)
-    return arg.strftime('%Y-%m')
+    return arg.strftime('%Y')
 
 
 df['Дата Cоздания'] = df['Дата Cоздания'].apply(todate)

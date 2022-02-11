@@ -72,8 +72,8 @@ df_cons_arr = df_cons_arr[df_cons_arr['количество'] > 1]
 count_all = df_dep.shape[0] + df_arr.shape[0]
 count_stop = count_all - df_cons_dep['количество'].sum() + df_cons_dep['номер'].count()
 
-# print('Кол отправлений из Москвы или в Москву: {:,.0F}'.format(a1))
-# print('Кол отправлений в Москву из Москвы (вкл в общ): ', df[(mask1 & mask2)].shape[0])
+print('Кол отправлений из Москвы или в Москву: {:,.0F}'.format(count_all))
+print('Кол отправлений в Москву из Москвы (вкл в общ): ', df[(mask1 & mask2)].shape[0])
 print('Кол стопов: {:,.0F}'.format(count_stop))
 
 count_rd = df_or['дата'].apply(todate1).reset_index()
