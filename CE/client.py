@@ -85,16 +85,20 @@ df = df[df['деньги'] > 50]
 
 df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['шт', 'вес', 'деньги'], aggfunc={'шт': len, 'вес': sum, 'деньги': sum})
 df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
-
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])
+df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
 
-print(df_pivot)
+name = 'ООО "ЮниКредит Лизинг"'
+df_pivot = df_pivot[df_pivot['Клиент'] == name]
 
 ######
 
-# fig = plt.figure(figsize=(5, 5))
-# sns.histplot(data=df1['вес'])
-# plt.show()
+fig = plt.figure(figsize=(10, 5))
+plt.xticks(rotation=45)
+# sns.set_style("darkgrid")
+# sns.set_palette("dark")
+sns.barplot(data=df_pivot, x='дата', y='деньги р.д.', color='green')
+plt.show()
 
 #######
 
@@ -107,7 +111,7 @@ worksheet = writer.sheets['итоги']
 format1 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
 worksheet.set_column('A:B', 10, format1)
 worksheet.set_column('B:C', 65, format1)
-worksheet.set_column('C:F', 15, format1)
+worksheet.set_column('C:G', 15, format1)
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 
