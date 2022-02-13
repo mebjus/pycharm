@@ -12,7 +12,8 @@ data/
 .xlsx
 .xls
 summary.xlsx
-
+.csv
+.zip
 
 # Distribution / packaging
 .Python
