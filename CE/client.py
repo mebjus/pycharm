@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from pandas.api.types import CategoricalDtype
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 df = pd.DataFrame
 dirname = 'data/kis/'
@@ -83,21 +85,31 @@ df.rename(columns={'Дата Cоздания': 'дата',
 
 df = df[df['деньги'] > 50]
 
-df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['шт', 'вес', 'деньги'], aggfunc={'шт': len, 'вес': sum, 'деньги': sum})
+df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['шт', 'вес', 'деньги'],
+                          aggfunc={'шт': len, 'вес': sum, 'деньги': sum})
 df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
 
-name = 'ООО "ЮниКредит Лизинг"'
-df_pivot = df_pivot[df_pivot['Клиент'] == name]
+# name = 'ООО "ЮниКредит Лизинг"'
+# df_pivot = df_pivot[df_pivot['Клиент'] == name]
+
+df_pivot = df_pivot.groupby('дата').agg(
+    {'Клиент': 'count', 'шт': 'sum', 'вес': 'sum', 'деньги': 'sum', 'деньги р.д.': 'sum'})
+df_pivot = df_pivot.reset_index()
+print(df_pivot)
 
 ######
 
-fig = plt.figure(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(8, 5))
 plt.xticks(rotation=45)
-# sns.set_style("darkgrid")
-# sns.set_palette("dark")
-sns.barplot(data=df_pivot, x='дата', y='деньги р.д.', color='green')
+g = sns.barplot(data=df_pivot, x='дата', y='деньги р.д.', color='green')
+# g.axvline(x='2019-12', color='r', lw=2)
+# g.axvline(x='2020-12', color='r', lw=2)
+# g.axvline(x='2021-12', color='r', lw=2)
+ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
+g.set_yticklabels(ylabels)
+
 plt.show()
 
 #######
@@ -132,5 +144,3 @@ for col_num, value in enumerate(df_pivot.columns.values):
     worksheet.write(0, col_num, value, header_format)
 
 writer.save()
-
-
