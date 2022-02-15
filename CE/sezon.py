@@ -11,7 +11,7 @@ df = pd.DataFrame
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
-pd.options.display.float_format = '{:,.0F}'.format
+# pd.options.display.float_format = '{:,.0F}'.format
 
 for file in fullpaths:
     if df.empty:
@@ -87,41 +87,33 @@ df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги']
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])   ### на рабочий день
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
 
-df_pivot['share'] = (df_pivot['деньги р.д.'] / df_pivot['деньги р.д.'].sum()) * 100
-
+df_pivot['share'] = (df_pivot['деньги р.д.'] / df_pivot['деньги р.д.'].sum())
+df_pivot.drop(columns=['index', 'деньги', 'р.д.', 'деньги р.д.'], axis=1, inplace=True)
+df_pivot['дата'] = df_pivot['дата'].dt.month
+df_pivot['diff'] = df_pivot['share'].diff() *10
 print(df_pivot)
 
 
 
 writer = pd.ExcelWriter('sezon.xlsx', engine='xlsxwriter')
-df_pivot.to_excel(writer, sheet_name='итоги', startrow=0, index=False, header=False)
-
+df_pivot.to_excel(writer, sheet_name='итоги', index=False, header=True)
 workbook = writer.book
 worksheet = writer.sheets['итоги']
-
-format1 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##2'})
-worksheet.set_column('A:B', 10, format1)
-worksheet.set_column('B:C', 65, format1)
-worksheet.set_column('C:I', 15, format1)
-workbook = writer.book
-worksheet = writer.sheets['итоги']
-
-
 writer.save()
 
 ######
-
-fig, ax = plt.subplots(figsize=(8, 5))
-plt.xticks(rotation=45)
-# plt.title(name)
-g = sns.barplot(data=df_pivot, x='дата', y='share', color='green')
-# g.axvline(x='2019-12', color='r', lw=2)
-# g.axvline(x='2020-12', color='r', lw=2)
-# g.axvline(x='2021-12', color='r', lw=2)
-ticks_loc = ax.get_yticks().tolist()
-ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
-ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
-g.set_yticklabels(ylabels)
-
-plt.show()
-#######
+#
+# fig, ax = plt.subplots(figsize=(8, 5))
+# plt.xticks(rotation=45)
+# # plt.title(name)
+# g = sns.barplot(data=df_pivot, x='дата', y='share', color='green')
+# # g.axvline(x='2019-12', color='r', lw=2)
+# # g.axvline(x='2020-12', color='r', lw=2)
+# # g.axvline(x='2021-12', color='r', lw=2)
+# ticks_loc = ax.get_yticks().tolist()
+# ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
+# ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
+# g.set_yticklabels(ylabels)
+#
+# plt.show()
+# #######
