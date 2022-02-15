@@ -24,8 +24,6 @@ for file in fullpaths:
             df1 = pd.concat(df1, axis=0).reset_index(drop=True)
             df = pd.concat([df, df1], axis=0)
 
-# df = pd.read_csv('all.zip')
-
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
 df_m.reset_index()
@@ -70,14 +68,6 @@ df['ФО'] = df['ФО'].astype('category')
 cat_type = CategoricalDtype(categories=['ЦФО', 'СЗФО', 'ПФО', 'ЮФО', 'УФО', 'СФО', 'ДВФО'], ordered=True)
 df['ФО'] = df['ФО'].astype(cat_type)
 
-df['Группа вес'] = pd.cut(df['Расчетный вес'], bins=[0, 1, 5, 30, 100, 1000000],
-                          labels=['0-1', '1-5', '5-30', '30-100', '100+'], right=False)
-
-df['Группа вес'] = df['Группа вес'].astype('category')
-
-## установить порядок в по весам
-cat_type = CategoricalDtype(categories=['0-1', '1-5', '5-30', '30-100', '100+'], ordered=True)
-df['Группа вес'] = df['Группа вес'].astype(cat_type)
 
 df.rename(columns={'Дата Cоздания': 'дата',
                    'Номер отправления': 'шт', 'Общая стоимость со скидкой': 'деньги', 'Расчетный вес': 'вес'},
@@ -86,51 +76,29 @@ df.rename(columns={'Дата Cоздания': 'дата',
 # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
 df = df[df['деньги'] > 50]
-df = df[df['ФО'] == 'СФО']
+# df = df[df['ФО'] == 'СЗФО']      ## выбор округа
 
 df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
                           aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
 
 df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
 
-df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])
-# df_pivot = df_pivot[df_pivot['деньги'] > 0]
+df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])   ### на рабочий день
 
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
 df_pivot['шт р.д.'] = df_pivot['шт'] / df_pivot['р.д.']
 df_pivot['вес р.д.'] = df_pivot['вес'] / df_pivot['р.д.']
 
-# ##### сюда если конкретного клиента, но надо выборку за день делать
-#
-# name = 'Индивидуальный предприниматель Саванеев Вячеслав Владимирович'
-# df_pivot = df_pivot[df_pivot['Клиент'] == name]
 
+######  этот блок для агрегации всех клиентов
 
-## сюда если всех клиентов, но надо выборку за месяц делать
 
 df_pivot = df_pivot.groupby('дата').agg(
     {'Клиент': 'count', 'шт р.д.': 'sum', 'вес р.д.': 'sum', 'деньги': 'sum', 'деньги р.д.': 'sum'})
 df_pivot = df_pivot.reset_index()
 
 print(df_pivot)
-#
-######
 
-fig, ax = plt.subplots(figsize=(8, 5))
-plt.xticks(rotation=45)
-# plt.title(name)
-g = sns.barplot(data=df_pivot, x='дата', y='деньги р.д.', color='green')
-# g.axvline(x='2019-12', color='r', lw=2)
-# g.axvline(x='2020-12', color='r', lw=2)
-# g.axvline(x='2021-12', color='r', lw=2)
-ticks_loc = ax.get_yticks().tolist()
-ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
-ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
-g.set_yticklabels(ylabels)
-
-plt.show()
-
-#######
 
 writer = pd.ExcelWriter('clients.xlsx', engine='xlsxwriter')
 df_pivot.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
@@ -145,9 +113,6 @@ worksheet.set_column('C:I', 15, format1)
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 
-# worksheet.add_table(0, 0, df_pivot.shape[0], 2, {'first_column': True, 'style': None, 'columns':
-#     [{'header': 'Дата'},
-#      {'header': 'Клиент'}]})
 
 header_format = workbook.add_format({
     'bold': True,
@@ -162,3 +127,21 @@ for col_num, value in enumerate(df_pivot.columns.values):
     worksheet.write(0, col_num, value, header_format)
 
 writer.save()
+
+######
+
+# fig, ax = plt.subplots(figsize=(8, 5))
+# plt.xticks(rotation=45)
+# # plt.title(name)
+# g = sns.barplot(data=df_pivot, x='дата', y='деньги р.д.', color='green')
+# # g.axvline(x='2019-12', color='r', lw=2)
+# # g.axvline(x='2020-12', color='r', lw=2)
+# # g.axvline(x='2021-12', color='r', lw=2)
+# ticks_loc = ax.get_yticks().tolist()
+# ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
+# ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
+# g.set_yticklabels(ylabels)
+#
+# plt.show()
+
+#######
