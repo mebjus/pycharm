@@ -9,10 +9,9 @@ __pycache__/
 
 #
 data/
-/
+data/kis/
 .xlsx
 .xls
-summary.xlsx
 .csv
 .zip
 
