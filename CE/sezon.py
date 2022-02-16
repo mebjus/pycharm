@@ -90,6 +90,7 @@ df_pivot['diff'] = df_pivot['share'].diff() *10
 
 print(df_pivot)
 
+
 writer = pd.ExcelWriter('sezon.xlsx', engine='xlsxwriter')
 df_pivot.to_excel(writer, sheet_name='итоги', index=False, header=True)
 workbook = writer.book
