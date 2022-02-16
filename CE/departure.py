@@ -94,27 +94,27 @@ df = df[df['деньги'] > 50]
 
 ######################  рисование  ##############
 #
-# money = df.groupby(['ФО'])['деньги'].sum().round()
-# dep = df.groupby(['ФО'])['вес'].sum().round()
-# kg = df.groupby(['ФО'])['шт'].count().round()
-#
-#
-# fig = plt.figure(figsize=(15, 5))
-# colors = sns.color_palette('pastel')[0:7]
-#
-# plt.subplot(131)
-# plt.title('Распределение ФО, деньги')
-# plt.pie(money, labels=money.index, colors=colors, autopct='%.1f%%')
-#
-# plt.subplot(132)
-# plt.title('Распределение количество')
-# plt.pie(dep, labels=dep.index, colors=colors, autopct='%.1f%%')
-#
-# plt.subplot(133)
-# plt.title('Распределение ФО, вес')
-# plt.pie(kg, labels=kg.index, colors=colors, autopct='%.1f%%')
-#
-# plt.show()
+money = df.groupby(['ФО'])['деньги'].sum().round()
+dep = df.groupby(['ФО'])['вес'].sum().round()
+kg = df.groupby(['ФО'])['шт'].count().round()
+
+
+fig = plt.figure(figsize=(15, 5))
+colors = sns.color_palette('pastel')[0:7]
+
+plt.subplot(131)
+plt.title('Распределение ФО, деньги')
+plt.pie(money, labels=money.index, colors=colors, autopct='%.1f%%')
+
+plt.subplot(132)
+plt.title('Распределение количество')
+plt.pie(dep, labels=dep.index, colors=colors, autopct='%.1f%%')
+
+plt.subplot(133)
+plt.title('Распределение ФО, вес')
+plt.pie(kg, labels=kg.index, colors=colors, autopct='%.1f%%')
+
+plt.show()
 #
 
 ### ФО по режиму колво
@@ -142,9 +142,9 @@ df1 = df[(df['Группа вес'] == '100+') & (df['деньги'] > 0)][
 
 df1.drop(columns=['index'], axis=1, inplace=True)
 
-for i in df['Группа вес'].values:
+cat_type = ['0-1', '1-5', '5-30', '30-100', '100+']
+for i in cat_type:
     df_pivot[('Средний КГ ', i)] = df_pivot[('деньги', i)] / df_pivot[('вес', i)]
-for i in df['Группа вес'].values:
     df_pivot[('Средний ЧЕК ', i)] = df_pivot[('деньги', i)] / df_pivot[('шт', i)]
 
 
@@ -167,15 +167,13 @@ df_pivot.rename(columns={'р .': 'р.д.'}, inplace=True)
 ####################### сохраняем в файл
 
 writer = pd.ExcelWriter('summary.xlsx', engine='xlsxwriter')
-df_pivot.to_excel(writer, sheet_name='итоги', startrow=2, index=False, header=False)  # index=False header=False
+df_pivot.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)  # index=False header=False
 df1.to_excel(writer, sheet_name='>100кг', index=False)
 
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 worksheet2 = writer.sheets['>100кг']
-worksheet.add_table(1, 0, df_pivot.shape[0] + 1, 1, {'first_column': False, 'style': None, 'columns':
-    [{'header': 'Дата'},
-     {'header': 'ФО'}]})
+
 worksheet2.add_table(0, 0, df1.shape[0], 6, {'first_column': False, 'style': None, 'columns':
     [{'header': 'Дата'},
      {'header': 'шт'},
@@ -196,10 +194,6 @@ worksheet.set_column('M:AH', 14, format3)
 worksheet2.set_column('A:F', 25, format4)
 worksheet2.set_column('G:G', 60, format4)
 
-workbook = writer.book
-worksheet = writer.sheets['итоги']
-worksheet2 = writer.sheets['>100кг']
-#
 header_format = workbook.add_format({
     'bold': True,
     'text_wrap': True,
