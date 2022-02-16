@@ -10,10 +10,10 @@ __pycache__/
 #
 data/
 data/kis/
-.xlsx
-.xls
-.csv
-.zip
+*.xlsx
+*.xls
+*.csv
+*.zip
 
 # Distribution / packaging
 .Python
