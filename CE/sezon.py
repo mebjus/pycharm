@@ -11,7 +11,7 @@ df = pd.DataFrame
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
-# pd.options.display.float_format = '{:,.0F}'.format
+pd.options.display.float_format = '{:,.2F}'.format
 
 for file in fullpaths:
     if df.empty:
@@ -80,20 +80,15 @@ df = df[df['деньги'] > 50]
 
 df_pivot = df.pivot_table(index=['дата'], values=['деньги'],
                           aggfunc={'деньги': sum})
-
 df_pivot = df_pivot.reset_index()
-df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
 
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])   ### на рабочий день
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
-
-df_pivot['share'] = (df_pivot['деньги р.д.'] / df_pivot['деньги р.д.'].sum())
-df_pivot.drop(columns=['index', 'деньги', 'р.д.', 'деньги р.д.'], axis=1, inplace=True)
 df_pivot['дата'] = df_pivot['дата'].dt.month
+df_pivot['share'] = (df_pivot['деньги р.д.'])/df_pivot['деньги р.д.'].sum()
 df_pivot['diff'] = df_pivot['share'].diff() *10
+
 print(df_pivot)
-
-
 
 writer = pd.ExcelWriter('sezon.xlsx', engine='xlsxwriter')
 df_pivot.to_excel(writer, sheet_name='итоги', index=False, header=True)
@@ -101,19 +96,16 @@ workbook = writer.book
 worksheet = writer.sheets['итоги']
 writer.save()
 
-######
-#
+#####
+
 # fig, ax = plt.subplots(figsize=(8, 5))
 # plt.xticks(rotation=45)
-# # plt.title(name)
+# plt.title('Сезонность')
 # g = sns.barplot(data=df_pivot, x='дата', y='share', color='green')
-# # g.axvline(x='2019-12', color='r', lw=2)
-# # g.axvline(x='2020-12', color='r', lw=2)
-# # g.axvline(x='2021-12', color='r', lw=2)
 # ticks_loc = ax.get_yticks().tolist()
 # ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
 # ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
 # g.set_yticklabels(ylabels)
 #
 # plt.show()
-# #######
+
