@@ -85,8 +85,8 @@ df_pivot = df_pivot.reset_index()
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])   ### на рабочий день
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
 df_pivot['дата'] = df_pivot['дата'].dt.month
-df_pivot['share'] = (df_pivot['деньги р.д.'])/df_pivot['деньги р.д.'].sum()
-df_pivot['diff'] = df_pivot['share'].diff() *10
+df_pivot['share'] = (df_pivot['деньги р.д.'])*100/df_pivot['деньги р.д.'].sum()
+df_pivot['diff'] = df_pivot['share'].diff()*10
 
 print(df_pivot)
 
@@ -99,14 +99,14 @@ writer.save()
 
 #####
 
-# fig, ax = plt.subplots(figsize=(8, 5))
-# plt.xticks(rotation=45)
-# plt.title('Сезонность')
-# g = sns.barplot(data=df_pivot, x='дата', y='share', color='green')
-# ticks_loc = ax.get_yticks().tolist()
-# ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
-# ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
-# g.set_yticklabels(ylabels)
-#
-# plt.show()
+fig, ax = plt.subplots(figsize=(8, 5))
+plt.xticks(rotation=45)
+plt.title('Сезонность')
+g = sns.barplot(data=df_pivot, x='дата', y='share', color='green')
+ticks_loc = ax.get_yticks().tolist()
+ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
+ylabels = ['{:,.0f}'.format(x)+'%' for x in g.get_yticks()]
+g.set_yticklabels(ylabels)
+
+plt.show()
 
