@@ -57,15 +57,15 @@ df['ФО'] = df['ФО'].astype('category')
 
 ########    выбор по своей географии
 
-# def ower_city(row):
-#     if row.upper() not in city_dict:
-#         return np.NAN
-#     else:
-#         return row
-#
-# df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
-# df['Получатель.Адрес.Город'] = df['Получатель.Адрес.Город'].apply(ower_city)
-# df = df.dropna(how='any', axis=0)
+def ower_city(row):
+    if str(row).upper() not in city_dict:
+        return np.NAN
+    else:
+        return row
+
+df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
+df['Получатель.Адрес.Город'] = df['Получатель.Адрес.Город'].apply(ower_city)
+df = df.dropna(how='any', axis=0)
 
 
 ## установить порядок в списке ФО
@@ -94,7 +94,7 @@ df.rename(columns={'Дата Cоздания': 'дата',
 df = df[df['деньги'] > 10]
 
 # df = df[df['Заказ.Клиент.Подразделение.Адрес.Город'] == 'Москва']
-# df = df[df['дата'] == '2021-11']
+# df = df[df['дата'] == '2021-10']
 
 df_pivot = df.pivot_table(index=['Вид доставки', 'дата'], columns=['Группа вес'], values=['деньги', 'шт'],
                           aggfunc={'деньги': sum, 'шт': len})

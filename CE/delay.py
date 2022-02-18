@@ -1,11 +1,8 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
 from pandas.api.types import CategoricalDtype
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+
 
 df = pd.DataFrame
 dirname = 'data/kis/'
@@ -24,6 +21,11 @@ for file in fullpaths:
             df1 = pd.concat(df1, axis=0).reset_index(drop=True)
             df = pd.concat([df, df1], axis=0)
 
+
+# df = df.dropna(how='any', axis=0)
+
+
+
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
 df_m.reset_index()
@@ -32,10 +34,6 @@ mounth = {}
 for i in df_m.index:
     mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
-dupl = list(df.columns)
-df_dupl = df[df.duplicated(subset=dupl)]
-df_dupl.index.nunique()
-df = df.drop_duplicates(subset=dupl)
 
 df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('M')
 
@@ -79,12 +77,12 @@ def ower_city(row):
     else:
         return row
 
-df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
-df['Получатель.Адрес.Город'] = df['Получатель.Адрес.Город'].apply(ower_city)
-df = df.dropna(how='any', axis=0)
+# df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
+# df['Получатель.Адрес.Город'] = df['Получатель.Адрес.Город'].apply(ower_city)
+# df = df.dropna(how='any', axis=0)
 
 
-## установить порядок в списке ФО
+# установить порядок в списке ФО
 cat_type = CategoricalDtype(categories=['ЦФО', 'СЗФО', 'ПФО', 'ЮФО', 'УФО', 'СФО', 'ДВФО'], ordered=True)
 df['ФО'] = df['ФО'].astype(cat_type)
 
@@ -103,42 +101,65 @@ df.rename(columns={'Дата Cоздания': 'дата',
 
 # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
-def mod(arg):
-    if arg.find('ЭКСПРЕСС') != -1:
-        return 'ЭКСПРЕСС'
-    elif arg.find('ПРАЙМ') != -1:
-        return 'ПРАЙМ'
-    elif arg.find('ОПТИМА') != -1:
-        return 'ОПТИМА'
-    else:
-        return 'ПРОЧИЕ'
-
-
-df['Режим доставки'] = df['Режим доставки'].apply(mod)
-df['Режим доставки'] = df['Режим доставки'].astype('category')
+# def mod(arg):
+#     if arg.find('ЭКСПРЕСС') != -1:
+#         return 'ЭКСПРЕСС'
+#     elif arg.find('ПРАЙМ') != -1:
+#         return 'ПРАЙМ'
+#     elif arg.find('ОПТИМА') != -1:
+#         return 'ОПТИМА'
+#     else:
+#         return 'ПРОЧИЕ'
+#
+#
+# df['Режим доставки'] = df['Режим доставки'].apply(mod)
+# df['Режим доставки'] = df['Режим доставки'].astype('category')
 
 
 df = df[df['деньги'] > 50]
-df = df[df['вес'] <= 0.250]
-df = df[df['ФО'] == 'СЗФО']
-df = df[df['Режим доставки'] == 'ЭКСПРЕСС']
-
-
-
+# df = df[df['вес'] <= 0.250]
+# df = df[df['ФО'] == 'СЗФО']
+# df = df[df['Режим доставки'] == 'ЭКСПРЕСС']
 # df = df[df['Вид доставки'] == 'Местная']
 
+num_start = df.shape[0]
 
-df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
-                          aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
+# print(df.info())
 
-df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
+#### если положительное значение - просрочка
+df['delta_delivery'] = df['Получатель.Дата получения отправления получателем'] - df['Заказ.Дата и время доставки']
+df['delta_get'] = df['Отправитель.Дата приема у отправителя'] - df['Дата dead-line приема отправления']
 
-df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])
-df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
+df1 = df[df['delta_delivery'].dt.components.days > 0]
+df1 = df1.reset_index()
+# print(df1['delta_delivery'])
+print(round((df1['delta_delivery'].shape[0]/num_start)*100, 2), '%', 'нарушены сроки доставки')
 
-df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
+df2 = df[df['delta_get'].dt.components.days > 0]
+df2 = df2.reset_index()
+# print(df2['delta_get'])
+print(round((df2['delta_get'].shape[0]/num_start)*100, 2), '%', 'нарушены сроки сбора')
 
-df_pivot = df_pivot[df_pivot['ср чек'] < 5000]     ### для отчета 0,25
+# df['delta'] = df['Получатель.Дата получения отправления получателем'] - df['Заказ.Дата и время доставки']
+
+# df = df[df['delta'].dt.components.days > 0]
+# df = df.reset_index()
+# print(df['delta'])
+# print(round((df['delta'].shape[0]/num_start)*100, 2), '%')
+
+
+
+# df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
+#                           aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
+#
+# df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
+#
+# df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])
+# df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
+#
+# df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
+#
+# df_pivot = df_pivot[df_pivot['ср чек'] < 5000]     ### для отчета 0,25
 
 
 # df_pivot['шт р.д.'] = df_pivot['шт'] / df_pivot['р.д.']
@@ -155,39 +176,33 @@ df_pivot = df_pivot[df_pivot['ср чек'] < 5000]     ### для отчета 
 #     {'Клиент': 'count', 'шт р.д.': 'sum', 'вес р.д.': 'sum', 'деньги': 'sum', 'деньги р.д.': 'sum'})
 # df_pivot = df_pivot.reset_index()
 
-print(df_pivot.info())
+# print(df_pivot.info())
 
 ######
 
-yaxes = df_pivot.groupby('дата')['деньги'].sum().reset_index()
-yaxes['дата'] = yaxes['дата'].astype('str')
-print(yaxes['дата'])
+# yaxes = df_pivot.groupby('дата')['деньги'].sum().reset_index()
+# yaxes['дата'] = yaxes['дата'].astype('str')
+# print(yaxes['дата'])
 
 ######
 
-fig, ax = plt.subplots(figsize=(8, 5))
-plt.xticks(rotation=45)
-g = sns.barplot(data=yaxes, x='дата', y='деньги', color='green')
-ticks_loc = ax.get_yticks().tolist()
-ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
-ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
-g.set_yticklabels(ylabels)
-plt.show()
+# fig, ax = plt.subplots(figsize=(8, 5))
+# plt.xticks(rotation=45)
+# g = sns.barplot(data=yaxes, x='дата', y='деньги', color='green')
+# ticks_loc = ax.get_yticks().tolist()
+# ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
+# ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
+# g.set_yticklabels(ylabels)
+# plt.show()
 
 #######
 
-writer = pd.ExcelWriter('clients.xlsx', engine='xlsxwriter')
-df_pivot.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
-df.to_excel(writer, sheet_name='итоги1', startrow=1, index=False, header=False)
+writer = pd.ExcelWriter('delay.xlsx', engine='xlsxwriter')
+df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
 
 workbook = writer.book
 worksheet = writer.sheets['итоги']
-worksheet = writer.sheets['итоги1']
 
-format = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
-worksheet.set_column('A:B', 10, format)
-worksheet.set_column('B:C', 65, format)
-worksheet.set_column('C:I', 15, format)
 
 header_format = workbook.add_format({
     'bold': True,
@@ -198,7 +213,7 @@ header_format = workbook.add_format({
     'num_format': '#,##0',
     'border': 1})
 
-for col_num, value in enumerate(df_pivot.columns.values):
+for col_num, value in enumerate(df.columns.values):
     worksheet.write(0, col_num, value, header_format)
 
 writer.save()
