@@ -4,27 +4,19 @@ import os
 from pandas.api.types import CategoricalDtype
 
 
-df = pd.DataFrame
+df = pd.DataFrame()
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.0F}'.format
 
 for file in fullpaths:
-    if df.empty:
-        if file.find('.xls') != -1:
-            df = pd.read_excel(file, header=2, sheet_name=None)
-            df = pd.concat(df, axis=0).reset_index(drop=True)
-    else:
-        if file.find('.xls') != -1:
-            df1 = pd.read_excel(file, header=2, sheet_name=None)
-            df1 = pd.concat(df1, axis=0).reset_index(drop=True)
-            df = pd.concat([df, df1], axis=0)
+    df1 = pd.read_excel(file, header=2, sheet_name=None)
+    df1 = pd.concat(df1, axis=0).reset_index(drop=True)
+    df = pd.concat([df, df1], axis=0)
 
 
 # df = df.dropna(how='any', axis=0)
-
-
 
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
@@ -36,6 +28,14 @@ for i in df_m.index:
 
 
 df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('M')
+
+##### фиотр на клиента
+
+
+df = df[df['Дата Cоздания'] == '2021-11']
+
+
+######
 
 dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
                     'КАЛИНИНГРАД'],
@@ -101,19 +101,19 @@ df.rename(columns={'Дата Cоздания': 'дата',
 
 # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
-# def mod(arg):
-#     if arg.find('ЭКСПРЕСС') != -1:
-#         return 'ЭКСПРЕСС'
-#     elif arg.find('ПРАЙМ') != -1:
-#         return 'ПРАЙМ'
-#     elif arg.find('ОПТИМА') != -1:
-#         return 'ОПТИМА'
-#     else:
-#         return 'ПРОЧИЕ'
-#
-#
-# df['Режим доставки'] = df['Режим доставки'].apply(mod)
-# df['Режим доставки'] = df['Режим доставки'].astype('category')
+def mod(arg):
+    if arg.find('ЭКСПРЕСС') != -1:
+        return 'ЭКСПРЕСС'
+    elif arg.find('ПРАЙМ') != -1:
+        return 'ПРАЙМ'
+    elif arg.find('ОПТИМА') != -1:
+        return 'ОПТИМА'
+    else:
+        return 'ПРОЧИЕ'
+
+
+df['Режим доставки'] = df['Режим доставки'].apply(mod)
+df['Режим доставки'] = df['Режим доставки'].astype('category')
 
 
 df = df[df['деньги'] > 50]
@@ -121,6 +121,7 @@ df = df[df['деньги'] > 50]
 # df = df[df['ФО'] == 'СЗФО']
 # df = df[df['Режим доставки'] == 'ЭКСПРЕСС']
 # df = df[df['Вид доставки'] == 'Местная']
+df = df[df['Клиент'] == 'Индивидуальный предприниматель Саванеев Вячеслав Владимирович']
 
 num_start = df.shape[0]
 
@@ -132,12 +133,12 @@ df['delta_get'] = df['Отправитель.Дата приема у отпра
 
 df1 = df[df['delta_delivery'].dt.components.days > 0]
 df1 = df1.reset_index()
-# print(df1['delta_delivery'])
+df1.drop(columns=['Отправитель.Дата приема у отправителя', 'Дата dead-line приема отправления'], axis=1, inplace=True)
 print(round((df1['delta_delivery'].shape[0]/num_start)*100, 2), '%', 'нарушены сроки доставки')
 
 df2 = df[df['delta_get'].dt.components.days > 0]
 df2 = df2.reset_index()
-# print(df2['delta_get'])
+df2.drop(columns=['Заказ.Дата и время доставки', 'Получатель.Дата получения отправления получателем'], axis=1, inplace=True)
 print(round((df2['delta_get'].shape[0]/num_start)*100, 2), '%', 'нарушены сроки сбора')
 
 # df['delta'] = df['Получатель.Дата получения отправления получателем'] - df['Заказ.Дата и время доставки']
@@ -198,11 +199,12 @@ print(round((df2['delta_get'].shape[0]/num_start)*100, 2), '%', 'нарушен�
 #######
 
 writer = pd.ExcelWriter('delay.xlsx', engine='xlsxwriter')
-df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
+df1.to_excel(writer, sheet_name='не доставки', startrow=1, index=False, header=False)
+df2.to_excel(writer, sheet_name='не сборы', startrow=1, index=False, header=False)
 
 workbook = writer.book
-worksheet = writer.sheets['итоги']
-
+worksheet = writer.sheets['не доставки']
+worksheet2 = writer.sheets['не сборы']
 
 header_format = workbook.add_format({
     'bold': True,
@@ -213,7 +215,9 @@ header_format = workbook.add_format({
     'num_format': '#,##0',
     'border': 1})
 
-for col_num, value in enumerate(df.columns.values):
+for col_num, value in enumerate(df1.columns.values):
     worksheet.write(0, col_num, value, header_format)
+for col_num, value in enumerate(df2.columns.values):
+    worksheet2.write(0, col_num, value, header_format)
 
 writer.save()
