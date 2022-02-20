@@ -1,27 +1,24 @@
 import numpy as np
 import pandas as pd
+import os
 from pandas.api.types import CategoricalDtype
 
-df = pd.DataFrame()
-file = 'data/pay.xls'
-df1 = pd.read_excel(file, header=2, sheet_name=None)
-df1 = pd.concat(df1, axis=0).reset_index(drop=True)
-df = pd.concat([df, df1], axis=0)
-df.reset_index()
-pd.options.display.float_format = '{:,.2F}'.format
+df = pd.DataFrame
+dirname = 'data/kis/'
+dirfiles = os.listdir(dirname)
+fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
+pd.options.display.float_format = '{:,.0F}'.format
 
-
-def dw(row):
-	if row == 0: d = 'понедельник'
-	elif row == 1: d = 'вторник'
-	elif row == 2: d = 'среда'
-	elif row == 3: d = 'четверг'
-	elif row == 4: d = 'пятница'
-	elif row == 5: d = 'суббота'
-	elif row == 6: d = 'воскресенье'
-	else: d = np.NAN
-	return d
-	
+for file in fullpaths:
+	if df.empty:
+		if file.find('.xls') != -1:
+			df = pd.read_excel(file, header=2, sheet_name=None)
+			df = pd.concat(df, axis=0).reset_index(drop=True)
+	else:
+		if file.find('.xls') != -1:
+			df1 = pd.read_excel(file, header=2, sheet_name=None)
+			df1 = pd.concat(df1, axis=0).reset_index(drop=True)
+			df = pd.concat([df, df1], axis=0)
 
 dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
                     'КАЛИНИНГРАД'],
@@ -36,6 +33,7 @@ dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', '
            'ДВФО': ['ВЛАДИВОСТОК', 'ХАБАРОВСК']
            }
 
+
 def ret(cell):  # столбец и ячейку передаю, возрат - округ
 	for i in dict_fo.keys():
 		if str(cell).upper() in dict_fo[i]:
@@ -44,43 +42,41 @@ def ret(cell):  # столбец и ячейку передаю, возрат - 
 		return 'ЦФО'
 
 
-df['ФО'] = df['Клиент.Подразделение.Адрес.Город'].apply(ret)
+df['ФО'] = df['Заказ.Клиент.Подразделение.Адрес.Город'].apply(ret)
 df['ФО'] = df['ФО'].astype('category')
 
 cat_type = CategoricalDtype(categories=['ЦФО', 'СЗФО', 'ПФО', 'ЮФО', 'УФО', 'СФО', 'ДВФО'], ordered=True)
 df['ФО'] = df['ФО'].astype(cat_type)
 
-df['week'] = df['Оплатить до'].dt.dayofweek
-df['week'] = df['week'].apply(dw)
-
-df['Дата счета'] = df['Дата счета'].dt.to_period('M')
+df = df.reset_index()
+# print(df['Заказ.Клиент.Не применять топливную надбавку'].value_counts())
 
 ####### фильтры
 
-df = df[df['Дата счета'] == '2021-09']
-df = df[df['Статус оплаты счета'] == 'Оплачен']
-# df = df[df['Клиент'] == 'ООО «Здоровит»']
-
+# df = df[df['Дата счета'] == '2021-09']
+# df = df[df['Клиент'] == 'ООО "Эмарсис"']
 
 start = df.shape[0]
-print(df['week'].value_counts(normalize=True)*100)
+# print(df.info())
 
-df['delay'] = df['Фактическая дата оплаты'] - df['Оплатить до']
-df = df[df['delay'].dt.components.days > 1]
-finish = df.shape[0]/start
-print('просроченных=', round(finish*100, 2), '%')
+df = df[df['Заказ.Клиент.Не применять топливную надбавку'] == 1]
+finish = df.shape[0] / start
+print('Без ТН =', round(finish * 100, 2), '%')
 
-lst = ['Статус счета','Статус оплаты счета','week','Сумма с учетом НДС', 'Клиент.Подразделение.Адрес.Город', 'Дата счета']
+df['sizetn'] = (df['Общая стоимость со скидкой'] - (df['Общая стоимость со скидкой'] / 122) * 100)
+print(df['sizetn'])
+print(round(df['sizetn'].sum(), 0))
+
+lst = ['Заказ.Дата и время доставки', 'Получатель.Дата получения отправления получателем',
+       'Отправитель.Дата приема у отправителя', 'Дата dead-line приема отправления', 'Получатель.Адрес',
+       'Получатель.Адрес.Город']
 df.drop(columns=lst, axis=1, inplace=True)
 
-df = df.sort_values(by=['Клиент', 'Оплатить до'], ascending=[True, True])
-
-
-writer = pd.ExcelWriter('billing.xlsx', engine='xlsxwriter')
-df.to_excel(writer, sheet_name='оплаты', startrow=1, index=False, header=False)
+writer = pd.ExcelWriter('tn.xlsx', engine='xlsxwriter')
+df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
 
 workbook = writer.book
-worksheet = writer.sheets['оплаты']
+worksheet = writer.sheets['итоги']
 
 header_format = workbook.add_format({
 	'bold':       True,
