@@ -32,33 +32,26 @@ def moscow(row):
 
 
 df['Прием курьером.Пакеты доставки.Курьер.Номер курьера'] = df[
-	'Прием курьером.Пакеты доставки.Курьер.Номер курьера'].apply(moscow)
+	'Прием курьером.Пакеты доставки.Курьер.Номер курьера'].astype(str).apply(moscow)
 df['Доставка курьером.Пакеты доставки.Курьер.Номер курьера'] = df[
-	'Доставка курьером.Пакеты доставки.Курьер.Номер курьера'].apply(moscow)
+	'Доставка курьером.Пакеты доставки.Курьер.Номер курьера'].astype(str).apply(moscow)
 
-
-df['Прием курьером.Пакеты доставки.Курьер.Номер курьера'] = df[
-	'Прием курьером.Пакеты доставки.Курьер.Номер курьера'].astype(str)
-df['Доставка курьером.Пакеты доставки.Курьер.Номер курьера'] = df[
-	'Доставка курьером.Пакеты доставки.Курьер.Номер курьера'].astype(str)
 
 df1 = df.copy()
 
-df = df.groupby('Дата Cоздания')['Прием курьером.Пакеты доставки.Курьер.Номер курьера'].agg(size=len,
-                                                                                              set=lambda x: set(x))
-df1 = df1.groupby('Дата Cоздания')['Доставка курьером.Пакеты доставки.Курьер.Номер курьера'].agg(size=len,
-                                                                                                 set=lambda x: set(x))
+df = df.groupby('Дата Cоздания')['Прием курьером.Пакеты доставки.Курьер.Номер курьера'].agg(set1=lambda x: set(x))
+df1 = df1.groupby('Дата Cоздания')['Доставка курьером.Пакеты доставки.Курьер.Номер курьера'].agg(set1=lambda x: set(x))
 
-df['set2'] = df1['set']
+df['set2'] = df1['set1']
 
 def discarded(row):
-	return row.discard('nan')
+	if np.NAN in row: return row.remove(np.NAN)
 
 
-df['set_all'] = df.apply(lambda x: x.set.union(x.set2), axis=1)
+df['set_all'] = df.apply(lambda x: x.set1.union(x.set2), axis=1)
 df['количество'] = df['set_all'].apply(discarded)
 df['количество'] = df['set_all'].apply(lambda x: len(x))
-df = df.drop(columns=['set', 'set2', 'size'])
+df = df.drop(columns=['set1', 'set2'])
 df = df.reset_index()
 print(df.info())
 ######
