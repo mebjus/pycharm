@@ -150,26 +150,26 @@ print(round((df2['delta_get'].shape[0] / num_start) * 100, 2), '%', 'наруш�
 
 #######
 
-writer = pd.ExcelWriter('delay.xlsx', engine='xlsxwriter')
-df1.to_excel(writer, sheet_name='не доставки', startrow=1, index=False, header=False)
-df2.to_excel(writer, sheet_name='не сборы', startrow=1, index=False, header=False)
-
-workbook = writer.book
-worksheet = writer.sheets['не доставки']
-worksheet2 = writer.sheets['не сборы']
-
-header_format = workbook.add_format({
-	'bold':       True,
-	'text_wrap':  True,
-	'valign':     'vcenter',
-	'fg_color':   '#D7E4BC',
-	'align':      'center_across',
-	'num_format': '#,##0',
-	'border':     1})
-
-for col_num, value in enumerate(df1.columns.values):
-	worksheet.write(0, col_num, value, header_format)
-for col_num, value in enumerate(df2.columns.values):
-	worksheet2.write(0, col_num, value, header_format)
-
-writer.save()
+# writer = pd.ExcelWriter('delay.xlsx', engine='xlsxwriter')
+# df1.to_excel(writer, sheet_name='не доставки', startrow=1, index=False, header=False)
+# df2.to_excel(writer, sheet_name='не сборы', startrow=1, index=False, header=False)
+#
+# workbook = writer.book
+# worksheet = writer.sheets['не доставки']
+# worksheet2 = writer.sheets['не сборы']
+#
+# header_format = workbook.add_format({
+# 	'bold':       True,
+# 	'text_wrap':  True,
+# 	'valign':     'vcenter',
+# 	'fg_color':   '#D7E4BC',
+# 	'align':      'center_across',
+# 	'num_format': '#,##0',
+# 	'border':     1})
+#
+# for col_num, value in enumerate(df1.columns.values):
+# 	worksheet.write(0, col_num, value, header_format)
+# for col_num, value in enumerate(df2.columns.values):
+# 	worksheet2.write(0, col_num, value, header_format)
+#
+# writer.save()
