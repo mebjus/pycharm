@@ -65,10 +65,8 @@ def tarif(row):
 				print(round(i['TotalPrice'], 2))
 				price_dict[lst] = i['TotalPrice']
 				return price_dict[lst]
-
-
-# else:
-# 	return row['price']
+	else:
+		return row['price']
 
 
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес', 'Режим доставки']].apply(
