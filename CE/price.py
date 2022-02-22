@@ -68,7 +68,7 @@ def tarif(row):
 				return price_dict[lst]
 			else:
 				price_dict[lst] = 'нет тарифа'
-				return 'нет тарифа'
+				return price_dict[lst]
 	else:
 		return row['price']
 
@@ -85,18 +85,24 @@ print(len(price_dict))
 df1=df[df['price'] == 'нет тарифа']
 df = df[df['price'] != 'нет тарифа']
 df['price'] = df['price'] * df['tn']
-df2 = df[df['price'] == 0]
+df2 = df[df['price'] == '']
 
 
 df = df[df['Общая стоимость со скидкой'] > 0]
 df = df[df['price'] > 0]
 
 df['discount'] = ((df['Общая стоимость со скидкой'] / df['price'])*100)-100
-# print(df['discount'])
+
 
 df = df.loc[:, ['Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
                 'Режим доставки',
                 'Общая стоимость со скидкой', 'price', 'tn', 'discount']]
+df1 = df1.loc[:, ['Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
+                'Режим доставки',
+                'Общая стоимость со скидкой', 'price', 'tn']]
+df2 = df2.loc[:, ['Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
+                'Режим доставки',
+                'Общая стоимость со скидкой', 'price', 'tn']]
 
 f = open('price.bin', 'wb')
 pickle.dump(price_dict, f)
@@ -122,9 +128,6 @@ header_format = workbook.add_format({
 
 for col_num, value in enumerate(df.columns.values):
 	worksheet.write(0, col_num, value, header_format)
-for col_num, value in enumerate(df1.columns.values):
-	worksheet2.write(0, col_num, value, header_format)
-for col_num, value in enumerate(df2.columns.values):
-	worksheet3.write(0, col_num, value, header_format)
+
 
 writer.save()
