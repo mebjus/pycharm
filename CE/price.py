@@ -41,11 +41,12 @@ def old(row):
 	row['Режим доставки'] = row['Режим доставки'].upper()
 	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['Расчетный вес'], row['Режим доставки'])
 	if lst in price_dict.keys():
-		print(round(price_dict[lst], 2), '*')
+		print(price_dict[lst], '*')
 		return price_dict[lst]
 	else:
 		return -1
 
+counter = 0
 
 def tarif(row):
 	if row['price'] == -1:
@@ -60,10 +61,13 @@ def tarif(row):
 		print(row['Режим доставки'])
 		for i in response.json()['Result']:
 			if i['Name'].upper() == row['Режим доставки']:
+				counter += 1
+				print(counter, ' - ')
 				print(round(i['TotalPrice'], 2))
 				price_dict[lst] = i['TotalPrice']
 				return price_dict[lst]
 			else:
+				price_dict[lst] = 'нет тарифа'
 				return 'нет тарифа'
 	else:
 		return row['price']
@@ -81,10 +85,18 @@ print(len(price_dict))
 df1=df[df['price'] == 'нет тарифа']
 df = df[df['price'] != 'нет тарифа']
 df['price'] = df['price'] * df['tn']
+df2 = df[df['price'] == 0]
+
+
+df = df[df['Общая стоимость со скидкой'] > 0]
+df = df[df['price'] > 0]
+
+df['discount'] = ((df['Общая стоимость со скидкой'] / df['price'])*100)-100
+# print(df['discount'])
 
 df = df.loc[:, ['Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
                 'Режим доставки',
-                'Общая стоимость со скидкой', 'price', 'tn']]
+                'Общая стоимость со скидкой', 'price', 'tn', 'discount']]
 
 f = open('price.bin', 'wb')
 pickle.dump(price_dict, f)
@@ -93,9 +105,11 @@ f.close()
 writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
 df1.to_excel(writer, sheet_name='нет тарифа', startrow=1, index=False, header=False)
+df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 worksheet2 = writer.sheets['нет тарифа']
+worksheet3 = writer.sheets['не определен']
 
 header_format = workbook.add_format({
 	'bold':       True,
@@ -110,5 +124,7 @@ for col_num, value in enumerate(df.columns.values):
 	worksheet.write(0, col_num, value, header_format)
 for col_num, value in enumerate(df1.columns.values):
 	worksheet2.write(0, col_num, value, header_format)
+for col_num, value in enumerate(df2.columns.values):
+	worksheet3.write(0, col_num, value, header_format)
 
 writer.save()
