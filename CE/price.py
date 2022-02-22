@@ -28,6 +28,8 @@ with open(filename, 'rb') as f:
 	price_dict = pickle.load(open(filename, 'rb'))
 ###########
 tn = 1.22
+counter = 0
+
 df['Заказ.Клиент.Не применять топливную надбавку'] = df['Заказ.Клиент.Не применять топливную надбавку'].fillna(0)
 
 df['tn'] = df['Заказ.Клиент.Не применять топливную надбавку'].apply(lambda x: 1 if x == 1 else tn)
@@ -46,9 +48,10 @@ def old(row):
 	else:
 		return -1
 
-counter = 0
+
 
 def tarif(row):
+	global counter
 	if row['price'] == -1:
 		row['Режим доставки'] = row['Режим доставки'].upper().strip()
 		lst = (
@@ -58,11 +61,11 @@ def tarif(row):
 		          'height':         '5',
 		          'length':         '5'}
 		response = requests.get(url, params=params)
-		print(row['Режим доставки'])
+		# print(row['Режим доставки'])
 		for i in response.json()['Result']:
 			if i['Name'].upper() == row['Режим доставки']:
 				counter += 1
-				print(counter, ' - ')
+				print(counter, '-')
 				print(round(i['TotalPrice'], 2))
 				price_dict[lst] = i['TotalPrice']
 				return price_dict[lst]
