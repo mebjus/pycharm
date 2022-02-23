@@ -22,11 +22,12 @@ for file in fullpaths:
 
 price_dict = {}
 
-###### если новый размер тн - закомментировать на первый запуск
+
 filename = 'price.bin'
 with open(filename, 'rb') as f:
 	price_dict = pickle.load(open(filename, 'rb'))
 ###########
+print(len(price_dict))
 tn = 1.22
 counter = 0
 
@@ -40,10 +41,12 @@ df = df[~df['Режим доставки'].isin(
 	 'ЭКСПРЕСС А', 'ПРАЙМ B', 'ЭКОНОМ  склад-склад', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-дверь', 'ЭКСПРЕСС ДАЛЬНИЙ ВОСТОК  Для физ.лиц'])]
 
 def old(row):
+	global counter
 	row['Режим доставки'] = row['Режим доставки'].upper()
 	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['Расчетный вес'], row['Режим доставки'])
 	if lst in price_dict.keys():
-		print(price_dict[lst], '*')
+		counter += 1
+		print(counter, ':', price_dict[lst], '*')
 		return price_dict[lst]
 	else:
 		return -1
@@ -52,28 +55,27 @@ def old(row):
 
 def tarif(row):
 	global counter
-	if row['price'] == -1:
-		row['Режим доставки'] = row['Режим доставки'].upper().strip()
-		lst = (
+	lst = (
 			row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['Расчетный вес'], row['Режим доставки'])
+	row['Режим доставки'] = row['Режим доставки'].upper().strip()
+	if lst in price_dict.keys():
+		counter += 1
+		print(counter, ':', price_dict[lst], '*')
+		return price_dict[lst]
+	if row['price'] == -1:
 		params = {'cityFrom':       row['Отправитель.Адрес.Город'], 'cityTo': row['Получатель.Адрес.Город'],
 		          'physicalWeight': row['Расчетный вес'], 'name': row['Режим доставки'], 'quantity': '1', 'width': '5',
 		          'height':         '5',
 		          'length':         '5'}
 		response = requests.get(url, params=params)
-		# print(row['Режим доставки'])
 		for i in response.json()['Result']:
 			if i['Name'].upper() == row['Режим доставки']:
 				counter += 1
-				print(counter, '-')
-				print(round(i['TotalPrice'], 2))
+				print(counter, ':', row['Режим доставки'], ':', round(i['TotalPrice'], 2))
 				price_dict[lst] = i['TotalPrice']
-				return price_dict[lst]
-			else:
-				price_dict[lst] = 'нет тарифа'
-				return price_dict[lst]
-	else:
-		return row['price']
+				return i['TotalPrice']
+	price_dict[lst] = 'нет тарифа'
+	return 'нет тарифа'
 
 
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес', 'Режим доставки']].apply(
@@ -83,18 +85,31 @@ df['price'] = df.loc[:,
               ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес', 'Режим доставки', 'price']].apply(
 	tarif, axis=1)
 
-print(len(price_dict))
 
-df1=df[df['price'] == 'нет тарифа']
+print(len(price_dict))
+f = open('price.bin', 'wb')
+pickle.dump(price_dict, f)
+f.close()
+
+# for i in price_dict.keys:
+# 	if price_dict.get(i) == 'нет тарифа':
+# 	print i
+
+
+df1 = df[df['price'] == -1]
+df2 = df[df['price'] == 'нет тарифа']
+
+df = df[df['price'] != -1]
 df = df[df['price'] != 'нет тарифа']
+
 df['price'] = df['price'] * df['tn']
-df2 = df[df['price'] == '']
+
 
 
 df = df[df['Общая стоимость со скидкой'] > 0]
 df = df[df['price'] > 0]
 
-df['discount'] = ((df['Общая стоимость со скидкой'] / df['price'])*100)-100
+df['discount'] = ((df['Общая стоимость со скидкой'] / df['price']))-1
 
 
 df = df.loc[:, ['Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
@@ -107,9 +122,7 @@ df2 = df2.loc[:, ['Клиент', 'Номер отправления', 'Отпр
                 'Режим доставки',
                 'Общая стоимость со скидкой', 'price', 'tn']]
 
-f = open('price.bin', 'wb')
-pickle.dump(price_dict, f)
-f.close()
+
 
 writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
