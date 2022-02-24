@@ -54,6 +54,7 @@ df = df[~df['Режим доставки'].isin(
      'ЭКСПРЕСС А', 'ПРАЙМ B', 'ЭКОНОМ  склад-склад', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-дверь',
      'ЭКСПРЕСС ДАЛЬНИЙ ВОСТОК  Для физ.лиц'])]
 
+
 def ret(cell):  # столбец и ячейку передаю, возрат - округ
     for i in dict_fo.keys():
         if str(cell).upper() in dict_fo[i]:
@@ -67,6 +68,7 @@ df['ФО'] = df['ФО'].astype('category')
 
 cat_type = CategoricalDtype(categories=['ЦФО', 'СЗФО', 'ПФО', 'ЮФО', 'УФО', 'СФО', 'ДВФО'], ordered=True)
 df['ФО'] = df['ФО'].astype(cat_type)
+
 
 def mod(arg):
     if arg.find('ЭКСПРЕСС') != -1:
@@ -160,14 +162,15 @@ def weight(row):
         if row['Расчетный вес'] <= 1: return round_custom(row['Расчетный вес'], 1)
 
     if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
-    'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
+        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
         if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС' or row['Режим'] == 'ОПТИМА':
             if row['Расчетный вес'] <= 1:
                 return round_custom(row['Расчетный вес'], 1)
             elif row['Расчетный вес'] > 1:
                 return round_custom(row['Расчетный вес'], 1)
 
-    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] != 'Москва' and row['Отправитель.Адрес.Город'] != 'Санкт-Петербург':
+    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
+        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
         if row['Расчетный вес'] <= 1:
             return round_custom(row['Расчетный вес'], 1)
         elif row['Расчетный вес'] > 1:
@@ -183,8 +186,7 @@ df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Пол
 
 df['price'] = df.loc[:,
               ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
-	tarif, axis=1)
-
+    tarif, axis=1)
 
 print(len(price_dict))
 
@@ -216,31 +218,39 @@ df = df[df['price'] > 0]
 
 df['discount'] = ((df['Общая стоимость со скидкой'] / df['price'])) - 1
 
-df = df.loc[:, ['ФО','Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
-                'вес', 'Режим доставки', 'Вид доставки',
-                'Общая стоимость со скидкой', 'price', 'tn', 'discount']]
-df1 = df1.loc[:, ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
-                  'вес', 'Режим доставки', 'Вид доставки',
-                  'Общая стоимость со скидкой', 'price', 'tn']]
-df2 = df2.loc[:, ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
-                  'вес', 'Режим доставки', 'Вид доставки',
-                  'Общая стоимость со скидкой', 'price', 'tn']]
+df_group = df.groupby('Клиент')[['price', 'Общая стоимость со скидкой']].agg({'price': 'sum', 'Общая стоимость со скидкой': 'sum'})
+df_group = df_group.reset_index()
 
 
-df_group = df.groupby('Клиент')['Общая стоимость со скидкой', 'price'].agg({'Общая стоимость со скидкой': 'sum', 'price': 'sum'})
+df = df.loc[:,
+     ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
+      'вес', 'Режим доставки', 'Вид доставки',
+      'Общая стоимость со скидкой', 'price', 'tn', 'discount']]
+
+df1 = df1.loc[:,
+      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
+       'вес', 'Режим доставки', 'Вид доставки',
+       'Общая стоимость со скидкой', 'price', 'tn']]
+df2 = df2.loc[:,
+      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
+       'вес', 'Режим доставки', 'Вид доставки',
+       'Общая стоимость со скидкой', 'price', 'tn']]
+
 
 
 writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
+
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
 df1.to_excel(writer, sheet_name='нет тарифа', startrow=1, index=False, header=False)
 df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
-df_group.to_excel(writer, sheet_name='группировка', startrow=0, index=False, header=False)
+df_group.to_excel(writer, sheet_name='группировка', startrow=1, index=False, header=False)
+
 workbook = writer.book
+
 worksheet = writer.sheets['итоги']
 worksheet2 = writer.sheets['нет тарифа']
 worksheet3 = writer.sheets['не определен']
 worksheet4 = writer.sheets['группировка']
-
 
 header_format = workbook.add_format({
     'bold': True,
@@ -255,5 +265,4 @@ for col_num, value in enumerate(df.columns.values):
     worksheet.write(0, col_num, value, header_format)
 for col_num, value in enumerate(df_group.columns.values):
     worksheet4.write(0, col_num, value, header_format)
-
 writer.save()
