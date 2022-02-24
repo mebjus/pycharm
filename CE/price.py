@@ -87,14 +87,22 @@ df['price'] = df.loc[:,
 
 
 print(len(price_dict))
+
 f = open('price.bin', 'wb')
 pickle.dump(price_dict, f)
 f.close()
 
-# for i in price_dict.keys:
-# 	if price_dict.get(i) == 'нет тарифа':
-# 	print i
 
+###### очистить "нет тарифа"
+
+# dict_new = {}
+# for i, j in price_dict.items():
+# 	if j != 'нет тарифа':
+# 		# print(i, j)
+# 		dict_new[i] = j
+# price_dict = dict_new.copy()
+# print(len(price_dict))
+ ########
 
 df1 = df[df['price'] == -1]
 df2 = df[df['price'] == 'нет тарифа']
