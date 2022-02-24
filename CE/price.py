@@ -226,14 +226,21 @@ df2 = df2.loc[:, ['ФО', 'Клиент', 'Номер отправления', '
                   'вес', 'Режим доставки', 'Вид доставки',
                   'Общая стоимость со скидкой', 'price', 'tn']]
 
+
+df_group = df.groupby('Клиент')['Общая стоимость со скидкой', 'price'].agg({'Общая стоимость со скидкой': 'sum', 'price': 'sum'})
+
+
 writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
 df1.to_excel(writer, sheet_name='нет тарифа', startrow=1, index=False, header=False)
 df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
+df_group.to_excel(writer, sheet_name='группировка', startrow=0, index=False, header=False)
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 worksheet2 = writer.sheets['нет тарифа']
 worksheet3 = writer.sheets['не определен']
+worksheet4 = writer.sheets['группировка']
+
 
 header_format = workbook.add_format({
     'bold': True,
@@ -246,5 +253,7 @@ header_format = workbook.add_format({
 
 for col_num, value in enumerate(df.columns.values):
     worksheet.write(0, col_num, value, header_format)
+for col_num, value in enumerate(df_group.columns.values):
+    worksheet4.write(0, col_num, value, header_format)
 
 writer.save()
