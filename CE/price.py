@@ -10,12 +10,14 @@ from pandas.api.types import CategoricalDtype
 token = '25945DB021CBCB00A59775B430B5B8BC'
 
 url = 'https://apitest.cityexpress.ru/v1/25945DB021CBCB00A59775B430B5B8BC/Calculate'
+# url = 'https://api.cityexpress.ru/v1/25945DB021CBCB00A59775B430B5B8BC/Calculate'
+
 
 df = pd.DataFrame()
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
-# pd.options.display.float_format = '{:,.0F}'.format
+pd.options.display.float_format = '{:,.0F}'.format
 
 for file in fullpaths:
     df1 = pd.read_excel(file, header=2, sheet_name=None)
@@ -23,6 +25,7 @@ for file in fullpaths:
     df = pd.concat([df, df1], axis=0)
 
 price_dict = {}
+price_freq = {}
 
 filename = 'price.bin'
 with open(filename, 'rb') as f:
@@ -86,12 +89,11 @@ df['Режим'] = df['Режим'].astype('category')
 
 
 def old(row):
-    global counter
     row['Режим доставки'] = row['Режим доставки'].upper()
     lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
+    if price_freq.get(lst) == None: price_freq[lst] = 0
     if lst in price_dict.keys():
-        counter += 1
-        print(counter, ':', price_dict[lst], '*')
+        price_freq[lst] += 1
         return price_dict[lst]
     else:
         return -1
@@ -99,13 +101,9 @@ def old(row):
 
 def tarif(row):
     global counter
-    lst = (
-        row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
+    lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
     row['Режим доставки'] = row['Режим доставки'].upper().strip()
-    if lst in price_dict.keys():
-        counter += 1
-        print(counter, ':', '*')
-        return price_dict[lst]
+    if lst in price_dict.keys(): return price_dict[lst]
     if row['price'] == -1:
         params = {'cityFrom': row['Отправитель.Адрес.Город'], 'cityTo': row['Получатель.Адрес.Город'],
                   'physicalWeight': row['вес'], 'name': row['Режим доставки'], 'quantity': '1', 'width': '5',
@@ -115,7 +113,7 @@ def tarif(row):
         for i in response.json()['Result']:
             if i['Name'].upper() == row['Режим доставки']:
                 counter += 1
-                print(counter, ':', row['Режим доставки'], ':', round(i['TotalPrice'], 2))
+                print(counter, ':', row['Режим доставки'].capitalize(), ':', round(i['TotalPrice'], 0))
                 price_dict[lst] = i['TotalPrice']
                 return i['TotalPrice']
     price_dict[lst] = 'нет тарифа'
@@ -180,15 +178,22 @@ def weight(row):
 
 df['вес'] = df.loc[:, ['Вид доставки', 'Расчетный вес', 'Режим доставки', 'Режим', 'Отправитель.Адрес.Город',
                        'Получатель.Адрес.Город']].apply(weight, axis=1)
-
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки']].apply(
     old, axis=1)
 
-df['price'] = df.loc[:,
-              ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
-    tarif, axis=1)
+df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(tarif, axis=1)
 
 print(len(price_dict))
+
+######### частота направлений
+sorted_dict = {}
+sorted_keys = sorted(price_freq, key=price_freq.get)
+for w in sorted_keys:
+    sorted_dict[w] = price_freq[w]
+
+for i,j in sorted_dict.items():
+    if j > 10:
+        print(i, j)
 
 ###### очистить "нет тарифа"
 
@@ -199,7 +204,7 @@ print(len(price_dict))
 # 		dict_new[i] = j
 # price_dict = dict_new.copy()
 # print(len(price_dict))
-########
+# #######
 
 f = open('price.bin', 'wb')
 pickle.dump(price_dict, f)
@@ -226,7 +231,6 @@ df = df.loc[:,
      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
       'вес', 'Режим доставки', 'Вид доставки',
       'Общая стоимость со скидкой', 'price', 'tn', 'discount']]
-
 df1 = df1.loc[:,
       ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
        'вес', 'Режим доставки', 'Вид доставки',
