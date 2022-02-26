@@ -104,7 +104,7 @@ def tarif(row):
     row['Режим доставки'] = row['Режим доставки'].upper().strip()
     if lst in price_dict.keys():
         counter += 1
-        print(counter, ':', price_dict[lst], '*')
+        print(counter, ':', '*')
         return price_dict[lst]
     if row['price'] == -1:
         params = {'cityFrom': row['Отправитель.Адрес.Город'], 'cityTo': row['Получатель.Адрес.Город'],
@@ -241,14 +241,14 @@ df2 = df2.loc[:,
 writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
 
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
-df1.to_excel(writer, sheet_name='нет тарифа', startrow=1, index=False, header=False)
+# df1.to_excel(writer, sheet_name='нет тарифа', startrow=1, index=False, header=False)
 df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
 df_group.to_excel(writer, sheet_name='группировка', startrow=1, index=False, header=False)
 
 workbook = writer.book
 
 worksheet = writer.sheets['итоги']
-worksheet2 = writer.sheets['нет тарифа']
+# worksheet2 = writer.sheets['нет тарифа']
 worksheet3 = writer.sheets['не определен']
 worksheet4 = writer.sheets['группировка']
 
