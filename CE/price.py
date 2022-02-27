@@ -221,10 +221,11 @@ df['price'] = df['price'] * df['tn']
 df = df[df['Общая стоимость со скидкой'] > 0]
 df = df[df['price'] > 0]
 
-df['discount'] = ((df['Общая стоимость со скидкой'] / df['price'])) - 1
+df['discount'] = (df['Общая стоимость со скидкой'] / df['price']) - 1
 
 df_group = df.groupby('Клиент')[['price', 'Общая стоимость со скидкой']].agg({'price': 'sum', 'Общая стоимость со скидкой': 'sum'})
 df_group = df_group.reset_index()
+df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
 
 
 df = df.loc[:,
