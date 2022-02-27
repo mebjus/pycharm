@@ -190,10 +190,12 @@ sorted_dict = {}
 sorted_keys = sorted(price_freq, key=price_freq.get)
 for w in sorted_keys:
     sorted_dict[w] = price_freq[w]
-
-for i,j in sorted_dict.items():
+sum_all = 0
+for i, j in sorted_dict.items():
+    sum_all  += j
+for i, j in sorted_dict.items():
     if j > 10:
-        print(i, j)
+        print(i, round((j/sum_all)*100, 1), '%')
 
 ###### очистить "нет тарифа"
 
