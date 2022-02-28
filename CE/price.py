@@ -7,6 +7,7 @@ import pickle
 import math
 from pandas.api.types import CategoricalDtype
 
+
 token = '25945DB021CBCB00A59775B430B5B8BC'
 
 url = 'https://apitest.cityexpress.ru/v1/25945DB021CBCB00A59775B430B5B8BC/Calculate'
@@ -187,7 +188,7 @@ print(len(price_dict))
 
 ######### частота направлений
 sorted_dict = {}
-sorted_keys = sorted(price_freq, key=price_freq.get)
+sorted_keys = sorted(price_freq, key=price_freq.get, reverse=True)
 for w in sorted_keys:
     sorted_dict[w] = price_freq[w]
 sum_all = 0
@@ -196,6 +197,10 @@ for i in sorted_dict.values():
 for i, j in sorted_dict.items():
     if j > 10:
         print(i, round((j/sum_all)*100, 3), '%')
+
+# writer = csv.DictWriter(sys.stdout, fieldnames=d)
+# writer.writeheader()
+# writer.writerow(d)
 
 ###### очистить "нет тарифа"
 
