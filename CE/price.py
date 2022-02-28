@@ -198,9 +198,7 @@ for i, j in sorted_dict.items():
     if j > 10:
         print(i, round((j/sum_all)*100, 3), '%')
 
-# writer = csv.DictWriter(sys.stdout, fieldnames=d)
-# writer.writeheader()
-# writer.writerow(d)
+df_dict = pd.DataFrame(sorted_dict.items(), columns=['кортеж', 'Value'])
 
 ###### очистить "нет тарифа"
 
@@ -239,10 +237,7 @@ df = df.loc[:,
      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
       'вес', 'Режим доставки', 'Вид доставки',
       'Общая стоимость со скидкой', 'price', 'tn', 'discount']]
-df1 = df1.loc[:,
-      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
-       'вес', 'Режим доставки', 'Вид доставки',
-       'Общая стоимость со скидкой', 'price', 'tn']]
+
 df2 = df2.loc[:,
       ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
        'вес', 'Режим доставки', 'Вид доставки',
@@ -253,14 +248,15 @@ df2 = df2.loc[:,
 writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
 
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
-# df1.to_excel(writer, sheet_name='нет тарифа', startrow=1, index=False, header=False)
 df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
 df_group.to_excel(writer, sheet_name='группировка', startrow=1, index=False, header=False)
+df_dict.to_excel(writer, sheet_name='популярность', startrow=1)
 
+df_dict
 workbook = writer.book
 
 worksheet = writer.sheets['итоги']
-# worksheet2 = writer.sheets['нет тарифа']
+worksheet2 = writer.sheets['популярность']
 worksheet3 = writer.sheets['не определен']
 worksheet4 = writer.sheets['группировка']
 
