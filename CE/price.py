@@ -94,6 +94,7 @@ def old(row):
 	if price_freq.get(lst) == None: price_freq[lst] = 0
 	if lst in price_dict.keys():
 		price_freq[lst] += 1
+		# price_freq[lst] += row['Общая стоимость со скидкой']
 		return price_dict[lst]
 	else:
 		return -1
@@ -178,7 +179,7 @@ def weight(row):
 
 df['вес'] = df.loc[:, ['Вид доставки', 'Расчетный вес', 'Режим доставки', 'Режим', 'Отправитель.Адрес.Город',
                        'Получатель.Адрес.Город']].apply(weight, axis=1)
-df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки']].apply(
+df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'Общая стоимость со скидкой']].apply(
 	old, axis=1)
 
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
@@ -200,7 +201,7 @@ for i, j in sorted_dict.items():
 
 df_dict = pd.DataFrame(sorted_dict.items(), columns=['кортеж', 'Value'])
 
-df_dict['Value'] = (df_dict['Value'] / sum_all) * 100
+df_dict['Value'] = df_dict['Value'] / sum_all
 
 ###### очистить "нет тарифа"
 
@@ -250,7 +251,7 @@ writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
 df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
 df_group.to_excel(writer, sheet_name='группировка', startrow=1, index=False, header=False)
-df_dict.to_excel(writer, sheet_name='популярность', startrow=1)
+df_dict.to_excel(writer, sheet_name='популярность', startrow=0, index=False)
 
 df_dict
 workbook = writer.book
