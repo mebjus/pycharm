@@ -200,6 +200,8 @@ for i, j in sorted_dict.items():
 
 df_dict = pd.DataFrame(sorted_dict.items(), columns=['кортеж', 'Value'])
 
+df_dict['Value'] = (df_dict['Value'] / sum_all) * 100
+
 ###### очистить "нет тарифа"
 
 # dict_new = {}
