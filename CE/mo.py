@@ -1,9 +1,6 @@
 import pandas as pd
 import os
 
-from pandas.api.types import CategoricalDtype
-
-
 df = pd.DataFrame()
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
@@ -15,16 +12,11 @@ for file in fullpaths:
     df1 = pd.concat(df1, axis=0).reset_index(drop=True)
     df = pd.concat([df, df1], axis=0)
 
-
-tn = 1.22
-
-
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
 
 df_m['Дата'] = df_m['Дата'].dt.to_period('M')
 df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('M')
-
 
 df = df[df['Вид доставки'] == 'Международная']
 
