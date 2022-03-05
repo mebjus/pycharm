@@ -63,20 +63,6 @@ cat_type = CategoricalDtype(categories=['ЦФО', 'СЗФО', 'ПФО', 'ЮФО'
 df['ФО'] = df['ФО'].astype(cat_type)
 
 
-def mod(arg):
-    if arg.find('ЭКСПРЕСС') != -1:
-        return 'ЭКСПРЕСС'
-    elif arg.find('ПРАЙМ') != -1:
-        return 'ПРАЙМ'
-    elif arg.find('ОПТИМА') != -1:
-        return 'ОПТИМА'
-    else:
-        return 'ПРОЧИЕ'
-
-
-df['Режим'] = df['Режим доставки'].apply(mod)
-df['Режим'] = df['Режим'].astype('category')
-
 
 df = df[df['Вид доставки'] == 'Международная']
 
