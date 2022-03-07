@@ -37,6 +37,7 @@ with open(filename, 'rb') as f:
 tn = 1.22
 counter = 0
 
+print(len(price_dict))
 #
 # ##########   ограничения на веса и стоимость
 # df = df[df['Расчетный вес'] <= 0.25]
@@ -230,8 +231,8 @@ df['price'] = df['price'].fillna(0)
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'Общая стоимость со скидкой', 'price']].apply(
 	old_2, axis=1)
 
-# df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
-# 	tarif, axis=1)
+df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
+	tarif, axis=1)
 
 print(len(price_dict))
 
@@ -267,7 +268,7 @@ df_dict = df_dict.merge(df_dict_money, how='left')
 df_dict = df_dict.merge(df_dict_money_public, how='left')
 
 
-# df_dict = df_dict[df_dict['Кол отправлений'] > 0]
+df_dict = df_dict[df_dict['Кол отправлений'] > 0]
 
 print(df_dict)
 
