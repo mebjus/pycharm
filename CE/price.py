@@ -17,7 +17,7 @@ df = pd.DataFrame()
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
-# pd.options.display.float_format = '{:,.0F}'.format
+pd.options.display.float_format = '{:,.2F}'.format
 
 for file in fullpaths:
 	df1 = pd.read_excel(file, header=2, sheet_name=None)
@@ -43,8 +43,6 @@ df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('D'
 
 df = df.merge(df_tn, left_on='Дата Cоздания', right_on='Дата', how='left')
 df['Размер'] = df['Размер'] + 1
-print(df_tn)
-print(df)
 
 # tn = 1.22
 counter = 0
@@ -173,7 +171,7 @@ def tarif(row):
 		for i in response.json()['Result']:
 			if i['Name'].upper() == row['Режим доставки']:
 				counter += 1
-				print(counter, ':', row['Режим доставки'].capitalize(), ':', round(i['TotalPrice'], 0))
+				print(counter, ':', lst, ':', round(i['TotalPrice'], 1))
 				price_dict[lst] = i['TotalPrice']
 				return i['TotalPrice']
 	price_dict[lst] = 'нет тарифа'
