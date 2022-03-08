@@ -17,7 +17,7 @@ df = pd.DataFrame()
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
-pd.options.display.float_format = '{:,.0F}'.format
+# pd.options.display.float_format = '{:,.0F}'.format
 
 for file in fullpaths:
 	df1 = pd.read_excel(file, header=2, sheet_name=None)
@@ -32,9 +32,21 @@ price_freq_public = {}
 filename = 'price.bin'
 with open(filename, 'rb') as f:
 	price_dict = pickle.load(open(filename, 'rb'))
+
 ###########
 
-tn = 1.22
+dirname = 'data/размер тн.xlsx'
+df_tn = pd.read_excel(dirname)
+
+df_tn['Дата'] = df_tn['Дата'].dt.to_period('D')
+df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('D')
+
+df = df.merge(df_tn, left_on='Дата Cоздания', right_on='Дата', how='left')
+df['Размер'] = df['Размер'] + 1
+print(df_tn)
+print(df)
+
+# tn = 1.22
 counter = 0
 
 print(len(price_dict))
@@ -79,7 +91,12 @@ def ower_city(row):
 
 df['Заказ.Клиент.Не применять топливную надбавку'] = df['Заказ.Клиент.Не применять топливную надбавку'].fillna(0)
 
-df['tn'] = df['Заказ.Клиент.Не применять топливную надбавку'].apply(lambda x: 1 if x == 1 else tn)
+def fuel(row):
+	if row['Заказ.Клиент.Не применять топливную надбавку'] == 1: return 1
+	else: return row['Размер']
+
+df['tn'] = df.loc[:, ['Заказ.Клиент.Не применять топливную надбавку', 'Размер']].apply(fuel, axis=1)
+
 
 df = df[~df['Режим доставки'].isin(
 	['ЭКСПРЕСС возврат документов', 'ЛОЖНЫЙ ВЫЗОВ', 'СКЛАД', 'ЭКСПРЕСС Груз', 'ВТОРИЧНАЯ ДОСТАВКА',
