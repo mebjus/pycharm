@@ -53,6 +53,7 @@ print(len(price_dict))
 # df = df[df['Расчетный вес'] <= 0.25]
 # df = df[df['Общая стоимость со скидкой'] > 220]
 
+df = df[df['Общая стоимость со скидкой'] > 0]
 
 dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
                     'КАЛИНИНГРАД'],
@@ -76,11 +77,11 @@ city_dict = ['САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
 
 ########    выбор по своей географии
 
-def ower_city(row):
-    if str(row).upper() not in city_dict:
-        return np.NAN
-    else:
-        return row
+# def ower_city(row):
+#     if str(row).upper() not in city_dict:
+#         return np.NAN
+#     else:
+#         return row
 #
 # df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
 # df['Получатель.Адрес.Город'] = df['Получатель.Адрес.Город'].apply(ower_city)
@@ -99,7 +100,7 @@ df['tn'] = df.loc[:, ['Заказ.Клиент.Не применять топл�
 df = df[~df['Режим доставки'].isin(
 	['ЭКСПРЕСС возврат документов', 'ЛОЖНЫЙ ВЫЗОВ', 'СКЛАД', 'ЭКСПРЕСС Груз', 'ВТОРИЧНАЯ ДОСТАВКА',
 	 'СИБИРСКИЙ ЭКСПРЕСС  Для физ.лиц', 'ВОЛЖСКИЙ ЭКСПРЕСС  склад-дверь до 0,5 кг', 'ЭКСПРЕСС B', 'ПРАЙМ А',
-	 'ЭКСПРЕСС А', 'ПРАЙМ B', 'ЭКОНОМ  склад-склад', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-дверь',
+	 'ЭКСПРЕСС А', 'ПРАЙМ B', 'ЭКОНОМ  склад-склад', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-дверь', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-склад',
 	 'ЭКСПРЕСС ДАЛЬНИЙ ВОСТОК  Для физ.лиц'])]
 
 
@@ -136,11 +137,12 @@ df['Режим'] = df['Режим'].astype('category')
 def old(row):
 	row['Режим доставки'] = row['Режим доставки'].upper()
 	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
-	if price_freq.get(lst) == None: price_freq[lst] = 0
-	if price_freq_money.get(lst) == None: price_freq_money[lst] = 0
 	if lst in price_dict.keys():
+		if price_freq.get(lst) == None: price_freq[lst] = 0
+		if price_freq_money.get(lst) == None: price_freq_money[lst] = 0
 		price_freq[lst] += 1
-		price_freq_money[lst] += row['Общая стоимость со скидкой']
+		print(lst, ':', 'есть')
+		if price_dict[lst] != 'нет тарифа': price_freq_money[lst] += row['Общая стоимость со скидкой']
 		return price_dict[lst]
 	else:
 		return -1
@@ -174,7 +176,9 @@ def tarif(row):
 				print(counter, ':', lst, ':', round(i['TotalPrice'], 1))
 				price_dict[lst] = i['TotalPrice']
 				return i['TotalPrice']
+	counter += 1
 	price_dict[lst] = 'нет тарифа'
+	print(counter, ':', lst, ':', 'нет тарифа')
 	return 'нет тарифа'
 
 
@@ -272,6 +276,14 @@ for w in sorted_keys_money_public:
 
 df_dict = pd.DataFrame(sorted_dict.items(), columns=['Кортеж', 'Кол отправлений'])
 df_dict_money = pd.DataFrame(sorted_dict_money.items(), columns=['Кортеж', 'Продали'])
+
+# print(df_dict_money['Продали'].sum())
+
+# s=0
+# for w in price_freq.values():
+# 	s += w
+# print(s)
+
 df_dict_money_public = pd.DataFrame(sorted_dict_money_public.items(), columns=['Кортеж', 'Паблик'])
 
 df_dict['Кол отправлений'].dropna(inplace=True)
@@ -283,9 +295,9 @@ df_dict = df_dict.merge(df_dict_money, how='left')
 df_dict = df_dict.merge(df_dict_money_public, how='left')
 
 
-df_dict = df_dict[df_dict['Кол отправлений'] > 0]
+# df_dict = df_dict[df_dict['Кол отправлений'] > 0]
 
-print(df_dict)
+# print(df_dict)
 
 # ###### очистить "нет тарифа"
 #
@@ -310,7 +322,7 @@ df = df[df['price'] != 'нет тарифа']
 
 df['price'] = df['price'] * df['tn']
 
-df = df[df['Общая стоимость со скидкой'] > 0]
+
 df = df[df['price'] > 0]
 
 df['discount'] = (df['Общая стоимость со скидкой'] / df['price']) - 1
@@ -337,7 +349,7 @@ df2.to_excel(writer, sheet_name='не определен', startrow=1, index=Fal
 df_group.to_excel(writer, sheet_name='группировка', startrow=1, index=False, header=False)
 df_dict.to_excel(writer, sheet_name='популярность', startrow=1, index=False)
 
-df_dict
+# df_dict
 workbook = writer.book
 
 worksheet = writer.sheets['итоги']
@@ -350,7 +362,7 @@ worksheet4.set_column('A:B', 50, format)
 worksheet4.set_column('B:D', 15, format)
 # worksheet4.set_column('C:I', 15, format)
 
-worksheet4.add_table(0, 0, df_dict.shape[0], 3, {'first_column': False, 'style': None})
+# worksheet4.add_table(0, 0, df_dict.shape[0], 3, {'first_column': False, 'style': None})
 
 header_format = workbook.add_format({
 	'bold':       True,
