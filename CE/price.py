@@ -253,7 +253,7 @@ df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Пол
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
 	tarif, axis=1)
 
-print(len(price_dict))
+# print(len(price_dict))
 
 
 ######### частота направлений
@@ -276,6 +276,8 @@ for w in sorted_keys_money_public:
 
 df_dict = pd.DataFrame(sorted_dict.items(), columns=['Кортеж', 'Кол отправлений'])
 df_dict_money = pd.DataFrame(sorted_dict_money.items(), columns=['Кортеж', 'Продали'])
+
+print(df.shape[0])
 
 # print(df_dict_money['Продали'].sum())
 
