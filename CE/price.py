@@ -11,8 +11,6 @@ token = '25945DB021CBCB00A59775B430B5B8BC'
 
 url = 'https://apitest.cityexpress.ru/v1/25945DB021CBCB00A59775B430B5B8BC/Calculate'
 
-
-
 df = pd.DataFrame()
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
@@ -67,35 +65,39 @@ dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', '
                     'КЕМЕРОВО'],
            'ДВФО': ['ВЛАДИВОСТОК', 'ХАБАРОВСК']}
 
-
 city_dict = ['САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
-              'КАЛИНИНГРАД', 'ЕКАТЕРИНБУРГ', 'ПЕРМЬ', 'ТЮМЕНЬ', 'УФА', 'ЧЕЛЯБИНСК', 'НИЖНИЙ НОВГОРОД', 'КАЗАНЬ',
-              'САМАРА',
-              'САРАТОВ', 'ТОЛЬЯТТИ', 'РОСТОВ-НА-ДОНУ', 'ВОЛГОГРАД', 'ВОРОНЕЖ', 'КРАСНОДАР',
-              'СТАВРОПОЛЬ', 'АСТРАХАНЬ', 'СОЧИ', 'НОВОСИБИРСК', 'КРАСНОЯРСК', 'ОМСК', 'ИРКУТСК',
-              'КЕМЕРОВО', 'ВЛАДИВОСТОК', 'ХАБАРОВСК', 'МОСКВА']
+             'КАЛИНИНГРАД', 'ЕКАТЕРИНБУРГ', 'ПЕРМЬ', 'ТЮМЕНЬ', 'УФА', 'ЧЕЛЯБИНСК', 'НИЖНИЙ НОВГОРОД', 'КАЗАНЬ',
+             'САМАРА',
+             'САРАТОВ', 'ТОЛЬЯТТИ', 'РОСТОВ-НА-ДОНУ', 'ВОЛГОГРАД', 'ВОРОНЕЖ', 'КРАСНОДАР',
+             'СТАВРОПОЛЬ', 'АСТРАХАНЬ', 'СОЧИ', 'НОВОСИБИРСК', 'КРАСНОЯРСК', 'ОМСК', 'ИРКУТСК',
+             'КЕМЕРОВО', 'ВЛАДИВОСТОК', 'ХАБАРОВСК', 'МОСКВА']
+
 
 ########    выбор по своей географии
 
-# def ower_city(row):
-#     if str(row).upper() not in city_dict:
-#         return np.NAN
-#     else:
-#         return row
-#
+def ower_city(row):
+	if str(row).upper() not in city_dict:
+		return np.NAN
+	else:
+		return row
+
+
 # df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
 # df['Получатель.Адрес.Город'] = df['Получатель.Адрес.Город'].apply(ower_city)
 # df = df.dropna(how='any', axis=0)
-              
+
 
 df['Заказ.Клиент.Не применять топливную надбавку'] = df['Заказ.Клиент.Не применять топливную надбавку'].fillna(0)
 
+
 def fuel(row):
-	if row['Заказ.Клиент.Не применять топливную надбавку'] == 1: return 1
-	else: return row['Размер']
+	if row['Заказ.Клиент.Не применять топливную надбавку'] == 1:
+		return 1
+	else:
+		return row['Размер']
+
 
 df['tn'] = df.loc[:, ['Заказ.Клиент.Не применять топливную надбавку', 'Размер']].apply(fuel, axis=1)
-
 
 df = df[~df['Режим доставки'].isin(
 	['ЭКСПРЕСС возврат документов', 'ЛОЖНЫЙ ВЫЗОВ', 'СКЛАД', 'ЭКСПРЕСС Груз', 'ВТОРИЧНАЯ ДОСТАВКА',
@@ -145,6 +147,7 @@ def old(row):
 		return price_dict[lst]
 	else:
 		return -1
+
 
 def old_2(row):
 	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
@@ -235,30 +238,30 @@ def weight(row):
 			return round_custom(row['Расчетный вес'], 1)
 	return row['Расчетный вес']
 
-df['Общая стоимость со скидкой'] = df['Общая стоимость со скидкой'].fillna(0)
 
+df['Общая стоимость со скидкой'] = df['Общая стоимость со скидкой'].fillna(0)
 
 df['вес'] = df.loc[:, ['Вид доставки', 'Расчетный вес', 'Режим доставки', 'Режим', 'Отправитель.Адрес.Город',
                        'Получатель.Адрес.Город']].apply(weight, axis=1)
-df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'Общая стоимость со скидкой']].apply(
+df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки',
+                         'Общая стоимость со скидкой']].apply(
 	old, axis=1)
 
 df['price'] = df['price'].fillna(0)
 
-df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'Общая стоимость со скидкой', 'price']].apply(
+df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки',
+                         'Общая стоимость со скидкой', 'price']].apply(
 	old_2, axis=1)
 
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
 	tarif, axis=1)
 
-# print(len(price_dict))
-
+print(len(price_dict))
 
 ######### частота направлений
 sorted_dict = {}
 sorted_dict_money = {}
 sorted_dict_money_public = {}
-
 
 sorted_keys = sorted(price_freq, key=price_freq.get, reverse=True)
 sorted_keys_money = sorted(price_freq_money, key=price_freq_money.get, reverse=True)
@@ -271,18 +274,8 @@ for w in sorted_keys_money:
 for w in sorted_keys_money_public:
 	sorted_dict_money_public[w] = price_freq_public[w]
 
-
 df_dict = pd.DataFrame(sorted_dict.items(), columns=['Кортеж', 'Кол отправлений'])
 df_dict_money = pd.DataFrame(sorted_dict_money.items(), columns=['Кортеж', 'Продали'])
-
-print(df.shape[0])
-
-# print(df_dict_money['Продали'].sum())
-
-# s=0
-# for w in price_freq.values():
-# 	s += w
-# print(s)
 
 df_dict_money_public = pd.DataFrame(sorted_dict_money_public.items(), columns=['Кортеж', 'Паблик'])
 
@@ -290,14 +283,10 @@ df_dict['Кол отправлений'].dropna(inplace=True)
 df_dict_money['Продали'].dropna(inplace=True)
 df_dict_money_public['Паблик'].dropna(inplace=True)
 
-
 df_dict = df_dict.merge(df_dict_money, how='left')
 df_dict = df_dict.merge(df_dict_money_public, how='left')
 
-
-# df_dict = df_dict[df_dict['Кол отправлений'] > 0]
-
-# print(df_dict)
+df_dict = df_dict[df_dict['Кол отправлений'] > 0]
 
 # ###### очистить "нет тарифа"
 #
@@ -321,7 +310,6 @@ df = df[df['price'] != -1]
 df = df[df['price'] != 'нет тарифа']
 
 df['price'] = df['price'] * df['tn']
-
 
 df = df[df['price'] > 0]
 
@@ -349,20 +337,18 @@ df2.to_excel(writer, sheet_name='не определен', startrow=1, index=Fal
 df_group.to_excel(writer, sheet_name='группировка', startrow=1, index=False, header=False)
 df_dict.to_excel(writer, sheet_name='популярность', startrow=1, index=False)
 
-# df_dict
 workbook = writer.book
 
 worksheet = writer.sheets['итоги']
 worksheet2 = writer.sheets['популярность']
 worksheet3 = writer.sheets['не определен']
-worksheet4 = writer.sheets['популярность']  
+worksheet4 = writer.sheets['популярность']
 
 format = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
 worksheet4.set_column('A:B', 50, format)
 worksheet4.set_column('B:D', 15, format)
-# worksheet4.set_column('C:I', 15, format)
 
-# worksheet4.add_table(0, 0, df_dict.shape[0], 3, {'first_column': False, 'style': None})
+worksheet4.add_table(0, 0, df_dict.shape[0], 3, {'first_column': False, 'style': None})
 
 header_format = workbook.add_format({
 	'bold':       True,
