@@ -49,7 +49,7 @@ counter = 0
 
 df = df[df['Общая стоимость со скидкой'] > 0]
 
-
+# print(price_dict)
 
 df['Заказ.Клиент.Не применять топливную надбавку'] = df['Заказ.Клиент.Не применять топливную надбавку'].fillna(0)
 
@@ -88,14 +88,16 @@ df['Режим'] = df['Режим'].astype('category')
 def old(row):
 	global counter
 	counter += 1
-	row['Режим доставки'] = row['Режим доставки'].upper()
+	row['Режим доставки'] = row['Режим доставки']
 	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
+
 	if lst in price_dict.keys():
-        print(counter)
+		print(counter)
 		if price_freq.get(lst) == None: price_freq[lst] = 0
 		if price_freq_money.get(lst) == None: price_freq_money[lst] = 0
 		price_freq[lst] += 1
-		if price_dict[lst] != 'нет тарифа': price_freq_money[lst] += row['Общая стоимость со скидкой']
+		print(lst, price_freq[lst])
+		# if price_dict[lst] != 'нет тарифа': price_freq_money[lst] += row['Общая стоимость со скидкой']
 		return price_dict[lst]
 	else:
 		return -1
@@ -163,8 +165,7 @@ df['вес'] = df.loc[:, ['Вид доставки', 'Расчетный вес'
                        'Получатель.Адрес.Город']].apply(weight, axis=1)
 
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки',
-                         'Общая стоимость со скидкой']].apply(
-	old, axis=1)
+                         'Общая стоимость со скидкой']].apply(old, axis=1)
 
 df['price'] = df['price'].fillna(0)
 
@@ -177,6 +178,8 @@ df['price'] = df['price'].fillna(0)
 
 
 ######### частота направлений
+
+
 sorted_dict = {}
 sorted_dict_money = {}
 sorted_dict_money_public = {}
@@ -195,7 +198,15 @@ for w in sorted_keys_money_public:
 df_dict = pd.DataFrame(sorted_dict.items(), columns=['Кортеж', 'Кол отправлений'])
 df_dict_money = pd.DataFrame(sorted_dict_money.items(), columns=['Кортеж', 'Продали'])
 
-print('размер df=', df.shape[0])
+
+
+# res = {key: sum(map(lambda i: int(i[0]), value)) for key, value in price_freq.items()}
+# for w in price_freq:
+# 	s += price_freq[w]
+print((sorted_dict.values()))
+
+# print('размер df=', df.shape[0])
+
 
 # print(df[df['Режим']=='ПРОЧИЕ']['Общая стоимость со скидкой'].sum())
 

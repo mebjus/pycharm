@@ -135,7 +135,6 @@ df['Режим'] = df['Режим'].astype('category')
 
 
 def old(row):
-	row['Режим доставки'] = row['Режим доставки'].upper()
 	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
 	if lst in price_dict.keys():
 		if price_freq.get(lst) == None: price_freq[lst] = 0
@@ -148,7 +147,6 @@ def old(row):
 		return -1
 
 def old_2(row):
-	row['Режим доставки'] = row['Режим доставки'].upper()
 	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
 	if price_freq_public.get(lst) == None: price_freq_public[lst] = 0
 	if lst in price_dict.keys():
