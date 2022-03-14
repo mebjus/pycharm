@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import os
 import requests
-from pprint import pprint
 import pickle
 import math
 from pandas.api.types import CategoricalDtype
@@ -18,9 +17,9 @@ fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.2F}'.format
 
 for file in fullpaths:
-	df1 = pd.read_excel(file, header=2, sheet_name=None)
-	df1 = pd.concat(df1, axis=0).reset_index(drop=True)
-	df = pd.concat([df, df1], axis=0)
+    df1 = pd.read_excel(file, header=2, sheet_name=None)
+    df1 = pd.concat(df1, axis=0).reset_index(drop=True)
+    df = pd.concat([df, df1], axis=0)
 
 price_dict = {}
 price_freq = {}
@@ -29,7 +28,7 @@ price_freq_public = {}
 
 filename = 'price.bin'
 with open(filename, 'rb') as f:
-	price_dict = pickle.load(open(filename, 'rb'))
+    price_dict = pickle.load(open(filename, 'rb'))
 
 ###########
 
@@ -76,10 +75,10 @@ city_dict = ['САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
 ########    выбор по своей географии
 
 def ower_city(row):
-	if str(row).upper() not in city_dict:
-		return np.NAN
-	else:
-		return row
+    if str(row).upper() not in city_dict:
+        return np.NAN
+    else:
+        return row
 
 
 # df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
@@ -91,27 +90,27 @@ df['Заказ.Клиент.Не применять топливную надб�
 
 
 def fuel(row):
-	if row['Заказ.Клиент.Не применять топливную надбавку'] == 1:
-		return 1
-	else:
-		return row['Размер']
+    if row['Заказ.Клиент.Не применять топливную надбавку'] == 1:
+        return 1
+    else:
+        return row['Размер']
 
 
 df['tn'] = df.loc[:, ['Заказ.Клиент.Не применять топливную надбавку', 'Размер']].apply(fuel, axis=1)
 
 df = df[~df['Режим доставки'].isin(
-	['ЭКСПРЕСС возврат документов', 'ЛОЖНЫЙ ВЫЗОВ', 'СКЛАД', 'ЭКСПРЕСС Груз', 'ВТОРИЧНАЯ ДОСТАВКА',
-	 'СИБИРСКИЙ ЭКСПРЕСС  Для физ.лиц', 'ВОЛЖСКИЙ ЭКСПРЕСС  склад-дверь до 0,5 кг', 'ЭКСПРЕСС B', 'ПРАЙМ А',
-	 'ЭКСПРЕСС А', 'ПРАЙМ B', 'ЭКОНОМ  склад-склад', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-дверь', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-склад',
-	 'ЭКСПРЕСС ДАЛЬНИЙ ВОСТОК  Для физ.лиц'])]
+    ['ЭКСПРЕСС возврат документов', 'ЛОЖНЫЙ ВЫЗОВ', 'СКЛАД', 'ЭКСПРЕСС Груз', 'ВТОРИЧНАЯ ДОСТАВКА',
+     'СИБИРСКИЙ ЭКСПРЕСС  Для физ.лиц', 'ВОЛЖСКИЙ ЭКСПРЕСС  склад-дверь до 0,5 кг', 'ЭКСПРЕСС B', 'ПРАЙМ А',
+     'ЭКСПРЕСС А', 'ПРАЙМ B', 'ЭКОНОМ  склад-склад', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-дверь', 'ЮЖНЫЙ ЭКСПРЕСС  дверь-склад',
+     'ЭКСПРЕСС ДАЛЬНИЙ ВОСТОК  Для физ.лиц'])]
 
 
 def ret(cell):  # столбец и ячейку передаю, возрат - округ
-	for i in dict_fo.keys():
-		if str(cell).upper() in dict_fo[i]:
-			return i
-	else:
-		return 'ЦФО'
+    for i in dict_fo.keys():
+        if str(cell).upper() in dict_fo[i]:
+            return i
+    else:
+        return 'ЦФО'
 
 
 df['ФО'] = df['Заказ.Клиент.Подразделение.Адрес.Город'].apply(ret)
@@ -122,14 +121,14 @@ df['ФО'] = df['ФО'].astype(cat_type)
 
 
 def mod(arg):
-	if arg.find('ЭКСПРЕСС') != -1:
-		return 'ЭКСПРЕСС'
-	elif arg.find('ПРАЙМ') != -1:
-		return 'ПРАЙМ'
-	elif arg.find('ОПТИМА') != -1:
-		return 'ОПТИМА'
-	else:
-		return 'ПРОЧИЕ'
+    if arg.find('ЭКСПРЕСС') != -1:
+        return 'ЭКСПРЕСС'
+    elif arg.find('ПРАЙМ') != -1:
+        return 'ПРАЙМ'
+    elif arg.find('ОПТИМА') != -1:
+        return 'ОПТИМА'
+    else:
+        return 'ПРОЧИЕ'
 
 
 df['Режим'] = df['Режим доставки'].apply(mod)
@@ -137,106 +136,106 @@ df['Режим'] = df['Режим'].astype('category')
 
 
 def old(row):
-	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
-	if lst in price_dict.keys():
-		if price_freq.get(lst) == None: price_freq[lst] = 0
-		if price_freq_money.get(lst) == None: price_freq_money[lst] = 0
-		price_freq[lst] += 1
-		print(lst, ':', 'есть')
-		if price_dict[lst] != 'нет тарифа': price_freq_money[lst] += row['Общая стоимость со скидкой']
-		return price_dict[lst]
-	else:
-		return -1
+    lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
+    if lst in price_dict.keys():
+        if price_freq.get(lst) == None: price_freq[lst] = 0
+        if price_freq_money.get(lst) == None: price_freq_money[lst] = 0
+        price_freq[lst] += 1
+        print(lst, ':', 'есть')
+        if price_dict[lst] != 'нет тарифа': price_freq_money[lst] += row['Общая стоимость со скидкой']
+        return price_dict[lst]
+    else:
+        return -1
 
 
 def old_2(row):
-	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
-	if price_freq_public.get(lst) == None: price_freq_public[lst] = 0
-	if lst in price_dict.keys():
-		if row['price'] != 'нет тарифа':
-			price_freq_public[lst] += row['price']
-		return price_dict[lst]
-	else:
-		return -1
+    lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
+    if price_freq_public.get(lst) == None: price_freq_public[lst] = 0
+    if lst in price_dict.keys():
+        if row['price'] != 'нет тарифа':
+            price_freq_public[lst] += row['price']
+        return price_dict[lst]
+    else:
+        return -1
 
 
 def tarif(row):
-	global counter
-	lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
-	row['Режим доставки'] = row['Режим доставки'].upper().strip()
-	if lst in price_dict.keys(): return price_dict[lst]
-	if row['price'] == -1:
-		params = {'cityFrom':       row['Отправитель.Адрес.Город'], 'cityTo': row['Получатель.Адрес.Город'],
-		          'physicalWeight': row['вес'], 'name': row['Режим доставки'], 'quantity': '1', 'width': '5',
-		          'height':         '5',
-		          'length':         '5'}
-		response = requests.get(url, params=params)
-		for i in response.json()['Result']:
-			if i['Name'].upper() == row['Режим доставки']:
-				counter += 1
-				print(counter, ':', lst, ':', round(i['TotalPrice'], 1))
-				price_dict[lst] = i['TotalPrice']
-				return i['TotalPrice']
-	counter += 1
-	price_dict[lst] = 'нет тарифа'
-	print(counter, ':', lst, ':', 'нет тарифа')
-	return 'нет тарифа'
+    global counter
+    lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
+    row['Режим доставки'] = row['Режим доставки'].upper().strip()
+    if lst in price_dict.keys(): return price_dict[lst]
+    if row['price'] == -1:
+        params = {'cityFrom':       row['Отправитель.Адрес.Город'], 'cityTo': row['Получатель.Адрес.Город'],
+                  'physicalWeight': row['вес'], 'name': row['Режим доставки'], 'quantity': '1', 'width': '5',
+                  'height':         '5',
+                  'length':         '5'}
+        response = requests.get(url, params=params)
+        for i in response.json()['Result']:
+            if i['Name'].upper() == row['Режим доставки']:
+                counter += 1
+                print(counter, ':', lst, ':', round(i['TotalPrice'], 1))
+                price_dict[lst] = i['TotalPrice']
+                return i['TotalPrice']
+    counter += 1
+    price_dict[lst] = 'нет тарифа'
+    print(counter, ':', lst, ':', 'нет тарифа')
+    return 'нет тарифа'
 
 
 def round_custom(num, step):
-	return math.ceil(num / step) * step
+    return math.ceil(num / step) * step
 
 
 def weight(row):
-	if row['Вид доставки'] == 'Междугородная':
-		if row['Режим доставки'] == 'ЭКОНОМ  склад-склад': return round_custom(row['Расчетный вес'], 1)
-		if row['Расчетный вес'] <= 0.5:
-			return 0.5
-		elif (row['Расчетный вес'] > 0.5) and (row['Расчетный вес'] <= 20):
-			return round_custom(row['Расчетный вес'], 0.5)
-		elif (row['Расчетный вес'] > 20):
-			return round_custom(row['Расчетный вес'], 1)
-
-	if row['Вид доставки'] == 'Международная': return round_custom(row['Расчетный вес'], 0.5)
-
-	if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Москва':
-		if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС':
-			if row['Расчетный вес'] <= 1:
-				return round_custom(row['Расчетный вес'], 0.25)
-			elif row['Расчетный вес'] > 1:
-				return round_custom(row['Расчетный вес'], 1)
-
-	if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Москва':
-		if row['Расчетный вес'] <= 1:
-			return round_custom(row['Расчетный вес'], 0.5)
-		elif row['Расчетный вес'] > 1:
-			return round_custom(row['Расчетный вес'], 1)
-
-	if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
-		if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС':
-			if row['Расчетный вес'] <= 1:
-				return round_custom(row['Расчетный вес'], 0.25)
-			elif row['Расчетный вес'] > 1:
-				return round_custom(row['Расчетный вес'], 1)
-
-	if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
-		if row['Расчетный вес'] <= 1: return round_custom(row['Расчетный вес'], 1)
-
-	if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
-		'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
-		if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС' or row['Режим'] == 'ОПТИМА':
-			if row['Расчетный вес'] <= 1:
-				return round_custom(row['Расчетный вес'], 1)
-			elif row['Расчетный вес'] > 1:
-				return round_custom(row['Расчетный вес'], 1)
-
-	if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
-		'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
-		if row['Расчетный вес'] <= 1:
-			return round_custom(row['Расчетный вес'], 1)
-		elif row['Расчетный вес'] > 1:
-			return round_custom(row['Расчетный вес'], 1)
-	return row['Расчетный вес']
+    if row['Вид доставки'] == 'Междугородная':
+        if row['Режим доставки'] == 'ЭКОНОМ  склад-склад': return round_custom(row['Расчетный вес'], 1)
+        if row['Расчетный вес'] <= 0.5:
+            return 0.5
+        elif (row['Расчетный вес'] > 0.5) and (row['Расчетный вес'] <= 20):
+            return round_custom(row['Расчетный вес'], 0.5)
+        elif (row['Расчетный вес'] > 20):
+            return round_custom(row['Расчетный вес'], 1)
+    
+    if row['Вид доставки'] == 'Международная': return round_custom(row['Расчетный вес'], 0.5)
+    
+    if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Москва':
+        if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС':
+            if row['Расчетный вес'] <= 1:
+                return round_custom(row['Расчетный вес'], 0.25)
+            elif row['Расчетный вес'] > 1:
+                return round_custom(row['Расчетный вес'], 1)
+    
+    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Москва':
+        if row['Расчетный вес'] <= 1:
+            return round_custom(row['Расчетный вес'], 0.5)
+        elif row['Расчетный вес'] > 1:
+            return round_custom(row['Расчетный вес'], 1)
+    
+    if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
+        if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС':
+            if row['Расчетный вес'] <= 1:
+                return round_custom(row['Расчетный вес'], 0.25)
+            elif row['Расчетный вес'] > 1:
+                return round_custom(row['Расчетный вес'], 1)
+    
+    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
+        if row['Расчетный вес'] <= 1: return round_custom(row['Расчетный вес'], 1)
+    
+    if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
+        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
+        if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС' or row['Режим'] == 'ОПТИМА':
+            if row['Расчетный вес'] <= 1:
+                return round_custom(row['Расчетный вес'], 1)
+            elif row['Расчетный вес'] > 1:
+                return round_custom(row['Расчетный вес'], 1)
+    
+    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
+        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
+        if row['Расчетный вес'] <= 1:
+            return round_custom(row['Расчетный вес'], 1)
+        elif row['Расчетный вес'] > 1:
+            return round_custom(row['Расчетный вес'], 1)
+    return row['Расчетный вес']
 
 
 df['Общая стоимость со скидкой'] = df['Общая стоимость со скидкой'].fillna(0)
@@ -245,16 +244,16 @@ df['вес'] = df.loc[:, ['Вид доставки', 'Расчетный вес'
                        'Получатель.Адрес.Город']].apply(weight, axis=1)
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки',
                          'Общая стоимость со скидкой']].apply(
-	old, axis=1)
+    old, axis=1)
 
 df['price'] = df['price'].fillna(0)
 
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки',
                          'Общая стоимость со скидкой', 'price']].apply(
-	old_2, axis=1)
+    old_2, axis=1)
 
 df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
-	tarif, axis=1)
+    tarif, axis=1)
 
 print(len(price_dict))
 
@@ -268,11 +267,11 @@ sorted_keys_money = sorted(price_freq_money, key=price_freq_money.get, reverse=T
 sorted_keys_money_public = sorted(price_freq_public, key=price_freq_public.get, reverse=True)
 
 for w in sorted_keys:
-	sorted_dict[w] = price_freq[w]
+    sorted_dict[w] = price_freq[w]
 for w in sorted_keys_money:
-	sorted_dict_money[w] = price_freq_money[w]
+    sorted_dict_money[w] = price_freq_money[w]
 for w in sorted_keys_money_public:
-	sorted_dict_money_public[w] = price_freq_public[w]
+    sorted_dict_money_public[w] = price_freq_public[w]
 
 df_dict = pd.DataFrame(sorted_dict.items(), columns=['Кортеж', 'Кол отправлений'])
 df_dict_money = pd.DataFrame(sorted_dict_money.items(), columns=['Кортеж', 'Продали'])
@@ -315,8 +314,8 @@ df = df[df['price'] > 0]
 
 df['discount'] = (df['Общая стоимость со скидкой'] / df['price']) - 1
 
-df_group = df.groupby('Клиент')[['price', 'Общая стоимость со скидкой']].agg(
-	{'price': 'sum', 'Общая стоимость со скидкой': 'sum'})
+df_group = df.groupby('Клиент')[['Общая стоимость со скидкой', 'price']].agg(
+    {'Общая стоимость со скидкой': 'sum', 'price': 'sum'})
 df_group = df_group.reset_index()
 df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
 
@@ -351,16 +350,16 @@ worksheet4.set_column('B:D', 15, format)
 worksheet4.add_table(0, 0, df_dict.shape[0], 3, {'first_column': False, 'style': None})
 
 header_format = workbook.add_format({
-	'bold':       True,
-	'text_wrap':  True,
-	'valign':     'vcenter',
-	'fg_color':   '#D7E4BC',
-	'align':      'center_across',
-	'num_format': '#,##0',
-	'border':     1})
+    'bold':       True,
+    'text_wrap':  True,
+    'valign':     'vcenter',
+    'fg_color':   '#D7E4BC',
+    'align':      'center_across',
+    'num_format': '#,##0',
+    'border':     1})
 
 for col_num, value in enumerate(df.columns.values):
-	worksheet.write(0, col_num, value, header_format)
+    worksheet.write(0, col_num, value, header_format)
 # for col_num, value in enumerate(df_dict.columns.values):
 # 	worksheet4.write(0, col_num, value, header_format)
 writer.save()
