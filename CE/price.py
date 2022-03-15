@@ -161,7 +161,7 @@ def old_2(row):
 
 def tarif(row):
     global counter
-    if row['Отправитель.Адрес.Город'] == 'Горское п, Выборгский р-н': return -1
+    if row['Отправитель.Адрес.Город'] == 'Горское п, Выборгский р-н': return 0
     lst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
     row['Режим доставки'] = row['Режим доставки'].upper().strip()
     if lst in price_dict.keys(): return price_dict[lst]
