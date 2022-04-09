@@ -318,8 +318,9 @@ df = df[df['price'] > 0]
 
 df['discount'] = (df['Общая стоимость со скидкой'] / df['price']) - 1
 
-df_group = df.groupby('Клиент')[['Общая стоимость со скидкой', 'price']].agg(
+df_group = df.groupby(['ФО', 'Клиент'])[['Общая стоимость со скидкой', 'price']].agg(
     {'Общая стоимость со скидкой': 'sum', 'price': 'sum'})
+df_group = df_group[df_group['Общая стоимость со скидкой'] > 0]
 df_group = df_group.reset_index()
 df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
 
