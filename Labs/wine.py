@@ -3,12 +3,12 @@ from pandas_profiling import ProfileReport
 import sweetviz as sv
 
 data = pd.read_csv('wine.csv')
-print(data['price'].max())
+# print(data['price'].max())
 # print(data[taster_name].nunique())
-print(data.info())
+# print(data.info())
 
-report = sv.analyze(data)
-report.show_html()
+# report = sv.analyze(data)
+# report.show_html()
 
 # profile = ProfileReport(data, title="Wine Pandas Profiling Report")
 # print(profile)
@@ -16,7 +16,7 @@ report.show_html()
 # ищем дубликаты
 dupl = list(data.columns)
 data_dupl = data[data.duplicated(subset=dupl)]
-print(data_dupl.shape[0])
+# print(data_dupl.shape[0])
 data_dupl.index.nunique()
 data = data.drop_duplicates(subset=dupl)
 
@@ -27,7 +27,7 @@ data = data.drop_duplicates(subset=dupl)
 n = data.shape[0] #число строк в таблице
 thresh = n*0.7
 data = data.dropna(how='any', thresh=thresh, axis=1)
-print(data.isnull().sum())
+# print(data.isnull().sum())
 
 values = {
     'country': 'unknown',
@@ -47,3 +47,7 @@ data = data.fillna(values)
 # d-tale;
 # pandas-profiling;
 # sweetviz.
+
+
+data = pd.read_csv('wine_cleared.csv')
+print(data.info())
