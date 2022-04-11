@@ -108,6 +108,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/Labs/recipes.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\Labs\data\dates.csv">
           <value>
             <Attribute>
