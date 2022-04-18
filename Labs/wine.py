@@ -1,12 +1,20 @@
 import pandas as pd
 from pandas_profiling import ProfileReport
 import sweetviz as sv
+import statistics as st
+import matplotlib.pyplot as plt
+from scipy import stats
+# from sklearn.metrics import matthews_corrcoef
+import seaborn as sns
+
 
 data = pd.read_csv('wine.csv')
 # print(data['price'].max())
 # print(data[taster_name].nunique())
 # print(data.info())
 
+
+# sweetviz
 # report = sv.analyze(data)
 # report.show_html()
 
@@ -49,5 +57,14 @@ data = data.fillna(values)
 # sweetviz.
 
 
-data = pd.read_csv('wine_cleared.csv')
-print(data.info())
+df = pd.read_csv('wine_cleared.csv')
+
+# print(df.corr(method = 'kendall'))
+
+df = pd.read_csv('model.csv')
+print(df.corr())
+# sns.heatmap(df.corr(), annot = True)
+# plt.show()
+
+report = sv.analyze(df)
+report.show_html()
