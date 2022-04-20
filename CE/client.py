@@ -29,6 +29,7 @@ df_m = pd.read_excel(dirname)
 df_m.reset_index()
 mounth = {}
 
+df_m['Дата'] = df_m['Дата'].dt.strftime('%Y-%m')
 for i in df_m.index:
     mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
@@ -37,7 +38,12 @@ df_dupl = df[df.duplicated(subset=dupl)]
 df_dupl.index.nunique()
 df = df.drop_duplicates(subset=dupl)
 
-df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('M')
+# df['Дата Cоздания'] = pd.to_datetime(df['Дата Cоздания']).dt.strftime('%Y-%m')
+# print(df['Дата Cоздания'])
+# print(mounth)
+# df['р.д.'] = df['Дата Cоздания'].apply(lambda x: mounth[str(x)])
+
+df['Дата Cоздания'] = df['Дата Cоздания'].dt.strftime('%Y-%m')
 
 dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
                     'КАЛИНИНГРАД'],
@@ -83,18 +89,20 @@ df.rename(columns={'Дата Cоздания': 'дата',
 
 # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
-df = df[df['деньги'] > 50]
+# df = df[df['деньги'] > 50]
 # df = df[df['вес'] <= 0.5]
 # df = df[df['ФО'] == 'ЦФО']
 # df = df[df['Вид доставки'] == 'Местная']
 
 
-df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
+df_pivot = df.pivot_table(index=['ФО', 'дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
                           aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
+df_pivot = df_pivot[df_pivot['шт'] > 0]
 
-df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
+df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[False, True, False]).index).reset_index()
 
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])
+
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
 
 df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
@@ -105,9 +113,9 @@ df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
 # df_pivot['шт р.д.'] = df_pivot['шт'] / df_pivot['р.д.']
 # df_pivot['вес р.д.'] = df_pivot['вес'] / df_pivot['р.д.']
 
-# ##### сюда если конкретного клиента, но надо выборку за день делать
-#
-# name = 'Индивидуальный предприниматель Саванеев Вячеслав Владимирович'
+##### сюда если конкретного клиента, но надо выборку за день делать
+
+# name = 'ООО "АКВА СЕРВИС"'
 # df_pivot = df_pivot[df_pivot['Клиент'] == name]
 
 # сюда если всех клиентов, но надо выборку за месяц делать
@@ -118,21 +126,21 @@ df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
 
 
 ######
-
-yaxes = df_pivot.groupby('дата')['деньги'].sum().reset_index()
-yaxes['дата'] = yaxes['дата'].astype('str')
-print(yaxes['дата'])
+#
+# yaxes = df_pivot.groupby('дата')['деньги'].sum().reset_index()
+# yaxes['дата'] = yaxes['дата'].astype('str')
+# print(yaxes['дата'])
 
 ######
 
-fig, ax = plt.subplots(figsize=(8, 5))
-plt.xticks(rotation=45)
-g = sns.barplot(data=yaxes, x='дата', y='деньги', color='green')
-ticks_loc = ax.get_yticks().tolist()
-ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
-ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
-g.set_yticklabels(ylabels)
-plt.show()
+# fig, ax = plt.subplots(figsize=(8, 5))
+# plt.xticks(rotation=45)
+# g = sns.barplot(data=yaxes, x='дата', y='деньги', color='green')
+# ticks_loc = ax.get_yticks().tolist()
+# ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
+# ylabels = ['{:,.0f}'.format(x) for x in g.get_yticks()]
+# g.set_yticklabels(ylabels)
+# plt.show()
 
 #######
 
@@ -144,8 +152,9 @@ worksheet = writer.sheets['итоги']
 
 format = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
 worksheet.set_column('A:B', 10, format)
-worksheet.set_column('B:C', 65, format)
-worksheet.set_column('C:I', 15, format)
+worksheet.set_column('B:C', 10, format)
+worksheet.set_column('C:D', 65, format)
+worksheet.set_column('D:I', 15, format)
 
 header_format = workbook.add_format({
     'bold': True,
