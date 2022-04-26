@@ -10,19 +10,19 @@ import matplotlib.ticker as ticker
 df = pd.DataFrame
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
-fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
+fullpaths = map(lambda name : os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.0F}'.format
 
-for file in fullpaths:
-    if df.empty:
-        if file.find('.xls') != -1:
-            df = pd.read_excel(file, header=2, sheet_name=None)
-            df = pd.concat(df, axis=0).reset_index(drop=True)
-    else:
-        if file.find('.xls') != -1:
-            df1 = pd.read_excel(file, header=2, sheet_name=None)
-            df1 = pd.concat(df1, axis=0).reset_index(drop=True)
-            df = pd.concat([df, df1], axis=0)
+for file in fullpaths :
+	if df.empty :
+		if file.find('.xls') != -1 :
+			df = pd.read_excel(file, header=2, sheet_name=None)
+			df = pd.concat(df, axis=0).reset_index(drop=True)
+	else :
+		if file.find('.xls') != -1 :
+			df1 = pd.read_excel(file, header=2, sheet_name=None)
+			df1 = pd.concat(df1, axis=0).reset_index(drop=True)
+			df = pd.concat([df, df1], axis=0)
 
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
@@ -30,13 +30,14 @@ df_m.reset_index()
 mounth = {}
 
 df_m['Дата'] = df_m['Дата'].dt.strftime('%Y-%m')
-for i in df_m.index:
-    mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
+for i in df_m.index :
+	mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
 dupl = list(df.columns)
 df_dupl = df[df.duplicated(subset=dupl)]
 df_dupl.index.nunique()
 df = df.drop_duplicates(subset=dupl)
+
 
 # df['Дата Cоздания'] = pd.to_datetime(df['Дата Cоздания']).dt.strftime('%Y-%m')
 # print(df['Дата Cоздания'])
@@ -45,26 +46,24 @@ df = df.drop_duplicates(subset=dupl)
 
 df['Дата Cоздания'] = df['Дата Cоздания'].dt.strftime('%Y-%m')
 
-dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
-                    'КАЛИНИНГРАД'],
-           'УФО': ['КУРГАН', 'НИЖНЕВАРТОВСК', 'НОВЫЙ УРЕНГОЙ', 'СТЕРЛИТАМАК', 'МАГНИТОГОРСК', 'ОРЕНБУРГ', 'СУРГУТ',
-                   'ЕКАТЕРИНБУРГ', 'ПЕРМЬ', 'ТЮМЕНЬ', 'УФА', 'ЧЕЛЯБИНСК'],
-           'ПФО': ['ИЖЕВСК', 'ПЕНЗА', 'УЛЬЯНОВСК', 'ЧЕБОКСАРЫ', 'КИРОВ', 'НИЖНИЙ НОВГОРОД', 'КАЗАНЬ', 'САМАРА',
-                   'САРАТОВ', 'ТОЛЬЯТТИ'],
-           'ЮФО': ['НОВОРОССИЙСК', 'СИМФЕРОПОЛЬ', 'ПЯТИГОРСК', 'РОСТОВ-НА-ДОНУ', 'ВОЛГОГРАД', 'ВОРОНЕЖ', 'КРАСНОДАР',
-                   'СТАВРОПОЛЬ', 'АСТРАХАНЬ', 'СОЧИ'],
-           'СФО': ['БАРНАУЛ', 'НОВОКУЗНЕЦК', 'ТОМСК', 'УЛАН-УДЭ', 'НОВОСИБИРСК', 'КРАСНОЯРСК', 'ОМСК', 'ИРКУТСК',
-                   'КЕМЕРОВО'],
-           'ДВФО': ['ВЛАДИВОСТОК', 'ХАБАРОВСК']
-           }
+dict_fo = {'СЗФО' : ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
+	'КАЛИНИНГРАД'],
+	'УФО' : ['КУРГАН', 'НИЖНЕВАРТОВСК', 'НОВЫЙ УРЕНГОЙ', 'СТЕРЛИТАМАК', 'МАГНИТОГОРСК', 'ОРЕНБУРГ', 'СУРГУТ',
+		'ЕКАТЕРИНБУРГ', 'ПЕРМЬ', 'ТЮМЕНЬ', 'УФА', 'ЧЕЛЯБИНСК'],
+	'ПФО' : ['ИЖЕВСК', 'ПЕНЗА', 'УЛЬЯНОВСК', 'ЧЕБОКСАРЫ', 'КИРОВ', 'НИЖНИЙ НОВГОРОД', 'КАЗАНЬ', 'САМАРА', 'САРАТОВ',
+		'ТОЛЬЯТТИ'],
+	'ЮФО' : ['НОВОРОССИЙСК', 'СИМФЕРОПОЛЬ', 'ПЯТИГОРСК', 'РОСТОВ-НА-ДОНУ', 'ВОЛГОГРАД', 'ВОРОНЕЖ', 'КРАСНОДАР',
+		'СТАВРОПОЛЬ', 'АСТРАХАНЬ', 'СОЧИ'],
+	'СФО' : ['БАРНАУЛ', 'НОВОКУЗНЕЦК', 'ТОМСК', 'УЛАН-УДЭ', 'НОВОСИБИРСК', 'КРАСНОЯРСК', 'ОМСК', 'ИРКУТСК', 'КЕМЕРОВО'],
+	'ДВФО' : ['ВЛАДИВОСТОК', 'ХАБАРОВСК']}
 
 
-def ret(cell):  # столбец и ячейку передаю, возрат - округ
-    for i in dict_fo.keys():
-        if str(cell).upper() in dict_fo[i]:
-            return i
-    else:
-        return 'ЦФО'
+def ret(cell) :  # столбец и ячейку передаю, возрат - округ
+	for i in dict_fo.keys() :
+		if str(cell).upper() in dict_fo[i] :
+			return i
+	else :
+		return 'ЦФО'
 
 
 df['ФО'] = df['Заказ.Клиент.Подразделение.Адрес.Город'].apply(ret)
@@ -75,7 +74,7 @@ cat_type = CategoricalDtype(categories=['ЦФО', 'СЗФО', 'ПФО', 'ЮФО'
 df['ФО'] = df['ФО'].astype(cat_type)
 
 df['Группа вес'] = pd.cut(df['Расчетный вес'], bins=[0, 1, 5, 30, 100, 1000000],
-                          labels=['0-1', '1-5', '5-30', '30-100', '100+'], right=False)
+	labels=['0-1', '1-5', '5-30', '30-100', '100+'], right=False)
 
 df['Группа вес'] = df['Группа вес'].astype('category')
 
@@ -83,9 +82,8 @@ df['Группа вес'] = df['Группа вес'].astype('category')
 cat_type = CategoricalDtype(categories=['0-1', '1-5', '5-30', '30-100', '100+'], ordered=True)
 df['Группа вес'] = df['Группа вес'].astype(cat_type)
 
-df.rename(columns={'Дата Cоздания': 'дата',
-                   'Номер отправления': 'шт', 'Общая стоимость со скидкой': 'деньги', 'Расчетный вес': 'вес'},
-          inplace=True)
+df.rename(columns={'Дата Cоздания' : 'дата', 'Номер отправления' : 'шт', 'Общая стоимость со скидкой' : 'деньги',
+	'Расчетный вес' :                'вес'}, inplace=True)
 
 # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
@@ -95,23 +93,44 @@ df.rename(columns={'Дата Cоздания': 'дата',
 # df = df[df['Вид доставки'] == 'Местная']
 
 
-df_pivot = df.pivot_table(index=['ФО', 'дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
-                          aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
+df_pivot = df.pivot_table(index=['ФО', 'Заказ.Клиент.Подразделение.Адрес.Город', 'дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
+	aggfunc={'деньги' : sum, 'шт' : len, 'вес' : sum})
+
 df_pivot = df_pivot[df_pivot['шт'] > 0]
 
-df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[False, True, False]).index).reset_index()
+df_pivot = df_pivot.reindex(
+	df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[False, True, False]).index).reset_index()
 
-df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])
-
+df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x : mounth[str(x)])
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
-
 df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
 
-# df_pivot = df_pivot[df_pivot['ср чек'] < 5000]     ### для отчета 0,25
+
+# если нужно проверить у кого скидка заканчивается
+
+####
+# dirname = 'data/скидка.xls'
+# df_dis = pd.read_excel(dirname)
+# df_dis = df_dis.rename(columns={'Наименование': 'Клиент'}).reset_index()
+# df_pivot['Не применять топливную надбавку'] = df_pivot['Не применять топливную надбавку'].fillna(0)
+# # df_pivot = df_pivot.merge(df_dis, how='inner', on='Клиент')
+#
 
 
-# df_pivot['шт р.д.'] = df_pivot['шт'] / df_pivot['р.д.']
-# df_pivot['вес р.д.'] = df_pivot['вес'] / df_pivot['р.д.']
+dirname = 'скидка.xlsx'
+df_total = pd.read_excel(dirname)
+df_total.reset_index()
+
+df_pivot = df_pivot.merge(df_total, how='left', on='Клиент')
+df_pivot.drop(['паблик', 'цена', 'ФО_y'], axis=1, inplace=True)
+
+### закрепленный прайс лист
+dirname = 'data/hold_price.xls'
+df_total = pd.read_excel(dirname)
+df_total.reset_index()
+df_pivot = df_pivot.merge(df_total, how='left', on='Клиент')
+df_pivot['Не применять топливную надбавку'] = df_pivot['Не применять топливную надбавку'].fillna(0)
+df_pivot.drop(['Дата создания', 'Подразделение.Адрес.Город', 'Тип клиента', '№ договора', 'Дата окончания договора'], axis=1, inplace=True)
 
 ##### сюда если конкретного клиента, но надо выборку за день делать
 
@@ -150,22 +169,18 @@ df_pivot.to_excel(writer, sheet_name='итоги', startrow=1, index=False, head
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 
-format = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
+format = workbook.add_format({'border' : 1, 'bg_color' : '#E8FBE1', 'num_format' : '#,##0'})
 worksheet.set_column('A:B', 10, format)
-worksheet.set_column('B:C', 10, format)
-worksheet.set_column('C:D', 65, format)
-worksheet.set_column('D:I', 15, format)
+worksheet.set_column('B:C', 15, format)
+worksheet.set_column('C:D', 10, format)
+worksheet.set_column('D:E', 65, format)
+worksheet.set_column('E:K', 15, format)
 
-header_format = workbook.add_format({
-    'bold': True,
-    'text_wrap': True,
-    'valign': 'vcenter',
-    'fg_color': '#D7E4BC',
-    'align': 'center_across',
-    'num_format': '#,##0',
-    'border': 1})
+header_format = workbook.add_format(
+	{'bold' :          True, 'text_wrap' : True, 'valign' : 'vcenter', 'fg_color' : '#D7E4BC',
+	'align' :      'center_across', 'num_format' : '#,##0', 'border' : 1})
 
-for col_num, value in enumerate(df_pivot.columns.values):
-    worksheet.write(0, col_num, value, header_format)
+for col_num, value in enumerate(df_pivot.columns.values) :
+	worksheet.write(0, col_num, value, header_format)
 
 writer.save()
