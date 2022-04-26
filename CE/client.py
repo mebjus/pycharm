@@ -38,7 +38,6 @@ df_dupl = df[df.duplicated(subset=dupl)]
 df_dupl.index.nunique()
 df = df.drop_duplicates(subset=dupl)
 
-
 # df['Дата Cоздания'] = pd.to_datetime(df['Дата Cоздания']).dt.strftime('%Y-%m')
 # print(df['Дата Cоздания'])
 # print(mounth)
@@ -93,8 +92,8 @@ df.rename(columns={'Дата Cоздания' : 'дата', 'Номер отпр
 # df = df[df['Вид доставки'] == 'Местная']
 
 
-df_pivot = df.pivot_table(index=['ФО', 'Заказ.Клиент.Подразделение.Адрес.Город', 'дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
-	aggfunc={'деньги' : sum, 'шт' : len, 'вес' : sum})
+df_pivot = df.pivot_table(index=['ФО', 'Заказ.Клиент.Подразделение.Адрес.Город', 'дата', 'Клиент'],
+	values=['деньги', 'шт', 'вес'], aggfunc={'деньги' : sum, 'шт' : len, 'вес' : sum})
 
 df_pivot = df_pivot[df_pivot['шт'] > 0]
 
@@ -102,9 +101,10 @@ df_pivot = df_pivot.reindex(
 	df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[False, True, False]).index).reset_index()
 
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x : mounth[str(x)])
-df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
-df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
 
+#### средний чек, средний рд
+# df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
+# df_pivot['ср чек'] = df_pivot['деньги'] / df_pivot['шт']
 
 # если нужно проверить у кого скидка заканчивается
 
@@ -130,7 +130,10 @@ df_total = pd.read_excel(dirname)
 df_total.reset_index()
 df_pivot = df_pivot.merge(df_total, how='left', on='Клиент')
 df_pivot['Не применять топливную надбавку'] = df_pivot['Не применять топливную надбавку'].fillna(0)
-df_pivot.drop(['Дата создания', 'Подразделение.Адрес.Город', 'Тип клиента', '№ договора', 'Дата окончания договора'], axis=1, inplace=True)
+df_pivot.drop(['Дата создания', 'Подразделение.Адрес.Город', 'Тип клиента', '№ договора', 'Дата окончания договора'],
+	axis=1, inplace=True)
+df_pivot.rename(columns={'Не применять топливную надбавку' : 'тн', 'Заказ.Клиент.Подразделение.Адрес.Город' : 'город',
+	'Клиентский номер' : 'кн', '(Юридическое лицо).Период формирования счетов': 'период'}, inplace=True)
 
 ##### сюда если конкретного клиента, но надо выборку за день делать
 
@@ -178,7 +181,7 @@ worksheet.set_column('E:K', 15, format)
 
 header_format = workbook.add_format(
 	{'bold' :          True, 'text_wrap' : True, 'valign' : 'vcenter', 'fg_color' : '#D7E4BC',
-	'align' :      'center_across', 'num_format' : '#,##0', 'border' : 1})
+		'align' :      'center_across', 'num_format' : '#,##0', 'border' : 1})
 
 for col_num, value in enumerate(df_pivot.columns.values) :
 	worksheet.write(0, col_num, value, header_format)
