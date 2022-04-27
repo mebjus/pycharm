@@ -54,7 +54,9 @@ df.rename(columns={'Заказ.Клиент.Клиентский номер':'к
 					'Номер отправления':'шт',
 					'Общая стоимость со скидкой':'деньги',
 					'Расчетный вес':'вес',
-					'Заказ.Клиент.Подразделение.Адрес.Город':'город'}, inplace=True)
+					'Заказ.Клиент.Подразделение.Адрес.Город':'город',
+					'Заказ.Клиент.Не применять топливную надбавку':'тн'}, inplace=True)
+df['тн'] = df['тн'].fillna(0)
 
 # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
@@ -63,37 +65,102 @@ df.rename(columns={'Заказ.Клиент.Клиентский номер':'к
 # df = df[df['ФО'] == 'ЦФО']
 # df = df[df['Вид доставки'] == 'Местная']
 
-df_pivot = df.pivot_table(index=['ФО', 'дата', 'город', 'Клиент'], values=['деньги'], aggfunc={'деньги':sum})
+def disk(row):
+	row['деньги'] = int(round(row['деньги'], 0))
+	k = 0
+	if (row['город'] == 'Москва') or (row['город'] == 'Санкт-Петербург'): k = 0
+	else: k = 15
+	if row['деньги'] in range(0, 10000) : return 5+k
+	if row['деньги'] in range(10001, 20000) : return 6+k
+	if row['деньги'] in range(20001, 30000) : return 7+k
+	if row['деньги'] in range(30001, 40000) : return 9+k
+	if row['деньги'] in range(40001, 50000) : return 10+k
+	if row['деньги'] in range(50001, 60000) : return 11+k
+	if row['деньги'] in range(60001, 70000) : return 12+k
+	if row['деньги'] in range(70001, 80000) : return 13+k
+	if row['деньги'] in range(80001, 90000) : return 15+k
+	if row['деньги'] in range(90001, 100000) : return 16+k
+	if row['деньги'] in range(100001, 110000) : return 17+k
+	if row['деньги'] in range(110001, 120000) : return 18+k
+	if row['деньги'] in range(120001, 130000) : return 19+k
+	if row['деньги'] in range(130001, 140000) : return 21+k
+	if row['деньги'] in range(140001, 150000) : return 22+k
+	if row['деньги'] in range(150001, 160000) : return 23+k
+	if row['деньги'] in range(160001, 170000) : return 24+k
+	if row['деньги'] in range(170001, 180000) : return 25+k
+	if row['деньги'] in range(180001, 190000) : return 27+k
+	if row['деньги'] in range(190001, 200000) : return 29+k
+	if row['деньги'] in range(200001, 210000) : return 30+k
+	if row['деньги'] in range(210001, 220000) : return 33+k
+	if row['деньги'] in range(220001, 230000) : return 34+k
+	if row['деньги'] in range(230001, 240000) : return 35+k
+	if row['деньги'] in range(240001, 250000) : return 36+k
+	if row['деньги'] in range(250001, 260000) : return 37+k
+	if row['деньги'] in range(260001, 270000) : return 39+k
+	if row['деньги'] in range(270001, 280000) : return 40+k
+	if row['деньги'] in range(280001, 290000) : return 41+k
+	if row['деньги'] in range(290001, 300000) : return 42+k
+	if row['деньги'] in range(310001, 320000) : return 43+k
+	if row['деньги'] in range(320001, 330000) : return 45+k
+	if row['деньги'] in range(330001, 340000) : return 46+k
+	if row['деньги'] in range(340001, 350000) : return 47+k
+	if row['деньги'] in range(350001, 360000) : return 48+k
+	if row['деньги'] in range(360001, 370000) : return 49+k
+	if row['деньги'] in range(370001, 380000) : return 51
+	if row['деньги'] in range(380001, 390000) : return 52
+	if row['деньги'] in range(390001, 400000) : return 53
+	if row['деньги'] in range(400001, 410000) : return 54
+	if row['деньги'] in range(410001, 420000) : return 55
+	if row['деньги'] in range(420001, 430000) : return 57
+	if row['деньги'] in range(430001, 440000) : return 58
+	if row['деньги'] in range(440001, 450000) : return 59
+	if row['деньги'] in range(450001, 460000) : return 60
+	if row['деньги'] in range(460001, 470000) : return 61
+	else:
+		return 'персональная'
+
+
+df_pivot = df.pivot_table(index=['ФО', 'дата', 'город', 'Клиент', 'тн'], values=['деньги'], aggfunc={'деньги':sum})
 df_pivot = df_pivot[df_pivot['деньги'] > 0]
 df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[True, True, False]).index).reset_index()
 
-####
+###  подставляем глобальную скидку по клиентам
 dirname = 'data/totaldis.xlsx'
 df_tmp = pd.read_excel(dirname)
 df_tmp.reset_index()
 df_pivot = df_pivot.merge(df_tmp, how='left', on='Клиент')
-df_pivot = df_pivot.loc[:, ['ФО','дата', 'город', 'Клиент', 'деньги', 'dis']]
-
+df_pivot = df_pivot.loc[:, ['ФО','дата', 'город', 'Клиент', 'деньги', 'dis', 'тн']]
 #
-# dirname = 'data/скидка.xlsx'
-# df_total = pd.read_excel(dirname)
-# df_total.reset_index()
-# df_pivot = df_pivot.merge(df_total, how='left', on='Клиент')
-# df_pivot.drop(['паблик', 'цена', 'ФО_y'], axis=1, inplace=True)
-
-# ### закрепленный прайс лист
-# dirname = 'data/hold_price.xls'
-# df_total = pd.read_excel(dirname)
-# df_total.reset_index()
-# df_pivot = df_pivot.merge(df_total, how='left', on='Клиент')
-# df_pivot['Не применять топливную надбавку'] = df_pivot['Не применять топливную надбавку'].fillna(0)
-# df_pivot.drop(['Дата создания', 'Подразделение.Адрес.Город', 'Тип клиента', '№ договора', 'Дата окончания договора'],
-# 	axis=1, inplace=True)
-# df_pivot.rename(columns={'Не применять топливную надбавку' : 'тн', 'Заказ.Клиент.Подразделение.Адрес.Город' : 'город',
-# 	'Клиентский номер' : 'кн', '(Юридическое лицо).Период формирования счетов': 'период'}, inplace=True)
+#### добавляем тех, у кого есть хотя бы один закрепленный тариф
+dirname = 'data/фикс_скидка.xls'
+df_tmp = pd.read_excel(dirname)
+df_tmp.reset_index()
+df_tmp.rename(columns={'(Юридическое лицо).Период формирования счетов':'период',
+					'Отсрочка платежа (дней)':'отсрочка'}, inplace=True)
+df_pivot = df_pivot.merge(df_tmp, how='left', on='Клиент')
+df_pivot = df_pivot.loc[:, ['ФО','дата', 'город', 'Клиент', 'деньги', 'dis', 'тн', 'период', 'отсрочка', 'Статус клиента']]
 
 
-#######
+
+
+#### добавляем тех, у кого есть закрепленный прайс лист
+dirname = 'data/hold_price.xls'
+df_tmp = pd.read_excel(dirname)
+df_tmp.reset_index()
+df_pivot = df_pivot.merge(df_tmp, how='left', on='Клиент')
+df_pivot = df_pivot.loc[:, ['ФО','дата', 'город', 'Клиент', 'деньги', 'dis', 'тн', 'период', 'отсрочка', 'Статус клиента_x', 'Тип клиента']]
+
+df_pivot['dis'] = round(df_pivot['dis'] * -100, 0)
+df_pivot['recomend'] = df_pivot.loc[:, ['деньги', 'город']].apply(disk, axis=1)
+
+
+#####
+
+
+dupl = list(df_pivot.columns)
+df_dupl = df_pivot[df_pivot.duplicated(subset=dupl)]
+df_dupl.index.nunique()
+df_pivot = df_pivot.drop_duplicates(subset=dupl)
 
 writer = pd.ExcelWriter('clients.xlsx', engine='xlsxwriter')
 df_pivot.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
