@@ -98,7 +98,7 @@ df_pivot = df.pivot_table(index=['ФО', 'Заказ.Клиент.Подразд
 df_pivot = df_pivot[df_pivot['шт'] > 0]
 
 df_pivot = df_pivot.reindex(
-	df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[False, True, False]).index).reset_index()
+	df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[True, True, False]).index).reset_index()
 
 df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x : mounth[str(x)])
 
