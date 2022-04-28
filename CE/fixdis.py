@@ -120,39 +120,44 @@ def disk(row):
 		return 'персональная'
 
 
-df_pivot = df.pivot_table(index=['ФО', 'дата', 'город', 'Клиент', 'тн'], values=['деньги'], aggfunc={'деньги':sum})
+df_pivot = df.pivot_table(index=['ФО', 'дата', 'город', 'кн', 'тн'], values=['деньги'], aggfunc={'деньги':sum})
 df_pivot = df_pivot[df_pivot['деньги'] > 0]
 df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['ФО', 'дата', 'деньги'], ascending=[True, True, False]).index).reset_index()
+
+### данные по клиентам (период счета, отсрочка и тп)
+
+dirname = 'data/юл.xls'
+df_tmp1 = pd.read_excel(dirname, sheet_name='Sheet1')
+df_tmp2 = pd.read_excel(dirname, sheet_name='Sheet2')
+df_tmp = pd.concat([df_tmp1, df_tmp2], axis=0)
+df_tmp.reset_index()
+df_pivot = df_pivot.merge(df_tmp, how='left', on='кн')
+df_pivot.rename(columns={'Отсрочка платежа (дней)': 'отсрочка',
+				   '(Юридическое лицо).Период формирования счетов': 'период'}, inplace=True)
+df_pivot['тн'] = df_pivot['тн'].apply(lambda x: 'нет' if x == 1 else 'да')
 
 ###  подставляем глобальную скидку по клиентам
 dirname = 'data/totaldis.xlsx'
 df_tmp = pd.read_excel(dirname)
 df_tmp.reset_index()
 df_pivot = df_pivot.merge(df_tmp, how='left', on='Клиент')
-df_pivot = df_pivot.loc[:, ['ФО','дата', 'город', 'Клиент', 'деньги', 'dis', 'тн']]
-#
+
+df_pivot['dis'] = round(df_pivot['dis'] * -100, 0)
+df_pivot['recomend'] = df_pivot.loc[:, ['деньги', 'город']].apply(disk, axis=1)
+df_pivot = df_pivot.loc[:, ['ФО', 'дата', 'город', 'кн', 'Клиент', 'деньги', 'dis', 'recomend', 'тн', 'отсрочка', 'период']]
+
+
 #### добавляем тех, у кого есть хотя бы один закрепленный тариф
 dirname = 'data/фикс_скидка.xls'
 df_tmp = pd.read_excel(dirname)
 df_tmp.reset_index()
-df_tmp.rename(columns={'(Юридическое лицо).Период формирования счетов':'период',
-					'Отсрочка платежа (дней)':'отсрочка'}, inplace=True)
-df_pivot = df_pivot.merge(df_tmp, how='left', on='Клиент')
-df_pivot = df_pivot.loc[:, ['ФО','дата', 'город', 'Клиент', 'деньги', 'dis', 'тн', 'период', 'отсрочка', 'Статус клиента']]
+df_pivot = df_pivot.merge(df_tmp, how='left', on='кн')
 
-
-
-
-#### добавляем тех, у кого есть закрепленный прайс лист
+# #### добавляем тех, у кого есть закрепленный прайс лист
 dirname = 'data/hold_price.xls'
 df_tmp = pd.read_excel(dirname)
 df_tmp.reset_index()
-df_pivot = df_pivot.merge(df_tmp, how='left', on='Клиент')
-df_pivot = df_pivot.loc[:, ['ФО','дата', 'город', 'Клиент', 'деньги', 'dis', 'тн', 'период', 'отсрочка', 'Статус клиента_x', 'Тип клиента']]
-
-df_pivot['dis'] = round(df_pivot['dis'] * -100, 0)
-df_pivot['recomend'] = df_pivot.loc[:, ['деньги', 'город']].apply(disk, axis=1)
-
+df_pivot = df_pivot.merge(df_tmp, how='left', on='кн')
 
 #####
 
@@ -169,12 +174,9 @@ workbook = writer.book
 worksheet = writer.sheets['итоги']
 
 format = workbook.add_format({'border' : 1, 'bg_color' : '#E8FBE1', 'num_format' : '#,##0'})
-worksheet.set_column('A:B', 10, format)
-worksheet.set_column('B:C', 15, format)
-worksheet.set_column('C:D', 10, format)
-worksheet.set_column('D:E', 65, format)
-worksheet.set_column('E:K', 15, format)
-
+worksheet.set_column('A:E', 10, format)
+worksheet.set_column('E:F', 65, format)
+worksheet.set_column('F:P', 10, format)
 header_format = workbook.add_format(
 	{'bold' :          True, 'text_wrap' : True, 'valign' : 'vcenter', 'fg_color' : '#D7E4BC',
 		'align' :      'center_across', 'num_format' : '#,##0', 'border' : 1})
