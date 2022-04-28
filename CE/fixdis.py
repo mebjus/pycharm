@@ -117,7 +117,7 @@ def disk(row):
 	if row['деньги'] in range(450001, 460000) : return 60
 	if row['деньги'] in range(460001, 470000) : return 61
 	else:
-		return 'персональная'
+		return 'перс'
 
 
 df_pivot = df.pivot_table(index=['ФО', 'дата', 'город', 'кн', 'тн'], values=['деньги'], aggfunc={'деньги':sum})
