@@ -27,17 +27,19 @@ for i in df_m.index:
     mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
 
-def todate(arg):
-    arg = pd.to_datetime(arg)
-    return arg.strftime('%Y-%m-%d')
-
-
+# def todate(arg):
+#     arg = pd.to_datetime(arg)
+#     return arg.strftime('%Y-%m-%d')
+#
+#
 def todate1(arg):
     arg = pd.to_datetime(arg)
     return arg.strftime('%Y-%m')
+#
+#
+# df['Дата Cоздания'] = df['Дата Cоздания'].apply(todate)
 
-
-df['Дата Cоздания'] = df['Дата Cоздания'].apply(todate)
+df['Дата Cоздания'] = df['Дата Cоздания'].dt.strftime('%Y-%m-%d')
 
 df.rename(columns={'Дата Cоздания': 'дата',
                    'Номер отправления': 'шт', 'Общая стоимость со скидкой': 'деньги'},
@@ -49,7 +51,7 @@ df.rename(columns={'Дата Cоздания': 'дата',
 ## преобразуем  дата фрейм под Москву
 
 df.loc[:,'шт'] = df.loc[:, 'шт'].apply(lambda x: x[0:12])   # отрезаем отправления -
-
+print(df['шт'])
 mask1 = df['Отправитель.Адрес.Город'] == 'Москва'
 mask2 = df['Получатель.Адрес.Город'] == 'Москва'
 df_dep = df[mask1]
@@ -78,9 +80,8 @@ print('Кол стопов: {:,.0F}'.format(count_stop))
 
 count_rd = df_or['дата'].apply(todate1).reset_index()
 count_rd = count_rd.groupby('дата').sum()
-
 count_rd = count_rd.reset_index()
-count_rd['р.д.'] = count_rd['дата'].apply(lambda x: mounth[x])
+count_rd['р.д.'] = count_rd['дата'].apply(lambda x: mounth[str(x)])
 
 
 print('Сумма деньги: {:,.0F}'.format((df_inner['деньги'].sum() + df_or['деньги'].sum())/2))
