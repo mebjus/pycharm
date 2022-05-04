@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from pandas.api.types import CategoricalDtype
+# from pandas.api.types import CategoricalDtype
 
 
 df = pd.DataFrame
@@ -38,7 +38,11 @@ dict_fo = {'СЗФО' : ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 
 df.rename(columns={'Дата Cоздания':'дата', 'Номер отправления':'шт', 'Общая стоимость со скидкой':'деньги',
 	'Расчетный вес':'вес', 'Отправитель.Адрес.Город':'город откуда', 'Получатель.Адрес.Город':'город куда'}, inplace=True)
 
+#### уберу нулевки
+df.loc[:,'ost'] = df.loc[:, 'шт'].apply(lambda x: x[12:])
+df = df.loc[df['ost'] != '-0']
 
+####
 set1 = df['шт'].count()
 df.loc[:,'шт'] = df.loc[:, 'шт'].apply(lambda x: x[0:12])
 set2 = df.groupby(['город откуда', 'шт'])['Клиент'].count().sort_values(ascending=False).reset_index()
