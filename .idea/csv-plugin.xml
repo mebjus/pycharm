@@ -10,6 +10,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/Labs/data/country_population.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/Labs/data/covid/country_vaccinations.csv">
           <value>
             <Attribute>
@@ -38,6 +45,13 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/Labs/data/heart.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="/Labs/data/melb_data.csv">
           <value>
             <Attribute>
@@ -53,6 +67,13 @@
           </value>
         </entry>
         <entry key="/Labs/data/melb_data_ps.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/Labs/data/model.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
