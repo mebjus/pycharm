@@ -45,7 +45,7 @@ df1 = df1.groupby('Дата Cоздания')['Доставка курьером
 df['set2'] = df1['set1']
 
 def discarded(row):
-	if np.NAN in row: return row.remove(np.NAN)
+	if np.NAN in row: return row.discard(np.NAN)
 
 
 df['set_all'] = df.apply(lambda x: x.set1.union(x.set2), axis=1)

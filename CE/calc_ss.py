@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import datetime
 
@@ -36,8 +37,6 @@ def chek_ufa(row):
         return '0' + row
     else:
         return row
-
-
 df['Прием курьером.Пакеты доставки.Курьер.Номер курьера'] = df[
     'Прием курьером.Пакеты доставки.Курьер.Номер курьера'].apply(chek_ufa)
 df['Доставка курьером.Пакеты доставки.Курьер.Номер курьера'] = df[
@@ -56,19 +55,22 @@ df.rename(columns={'Дата Cоздания': 'дата', 'Номер отпр�
 # df.loc[:, 'ost'] = df.loc[:, 'шт'].apply(lambda x: x[12:])
 # df = df.loc[df['ost'] != '-0']
 
-## процедура проверки курьера из этого ли города отправление
-# def chek_city(row):
-#     if row['шт'][0:2] == row['прием'][0:2]:
-#         return 1
-#     else:
-#         return 0
+# процедура проверки курьера из этого ли города отправление
+def chek_city(row):
+    if row['шт'][0:2] != row['прием'][0:2]:
+        return 'nan'
+    else: return row['прием']
 
-# df['flag'] = df.loc[:, ['шт', 'прием']].apply(chek_city, axis=1)
-# df = df.loc[df['flag'] != 0]
+df['прием'] = df.loc[:, ['шт', 'прием']].apply(chek_city, axis=1)
+
+# def chek_city(row):
+#     if row['шт'][0:2] != row['доставка'][0:2]:
+#         return 'nan'
+# df['доставка'] = df.loc[:, ['шт', 'доставка']].apply(chek_city, axis=1)
 
 ### сборы, консолидация
-df_pick = df[df['дата'] >= start]
-
+df_pick = df[df['Отправитель.Дата приема у отправителя'] >= start]
+df_pick = df_pick[df_pick['Отправитель.Дата приема у отправителя'] <= finish]
 
 df_pick.loc[:, 'tmp'] = df_pick.loc[:, 'Отправитель.Дата приема у отправителя'].dt.strftime('%Y-%m-%d')
 df_pick = df_pick.sort_values(['tmp', 'Отправитель.Адрес', 'Отправитель.Дата приема у отправителя'])
@@ -113,96 +115,54 @@ for i in range(df_deliv.shape[0]):
         df_deliv.iloc[i, 6] = datetime.timedelta()
         df_deliv.iloc[i, 8] = 1
 
-print(df_deliv.info())
 df_deliv_group = df_deliv.groupby(['tmp', 'город куда'])['консолид'].sum().reset_index()
 df_deliv_group = df_deliv_group.reindex(df_deliv_group.sort_values(by=['tmp', 'консолид'], ascending=[True, False]).index)
 
-###############3
-
-# ###  кол-во курьеров на сборе
-# df_curr = df_dep.pivot_table(index=['дата', 'город откуда'], values=['прием'], aggfunc={'прием': set}).reset_index()
-# df_curr.loc[:, 'count'] = df_curr.loc[:, 'прием'].apply(lambda x: len(x))
-# df_curr = df_curr.reindex(df_curr.sort_values(by=['дата', 'count'], ascending=[True, False]).index)
-#
-# ###  кол-во курьеров на доставке
-# df_curr2 = df_arr.pivot_table(index=['дата получения', 'город куда'], values=['доставка'],aggfunc={'доставка': set}).reset_index()
-# df_curr2.loc[:, 'count'] = df_curr2.loc[:, 'доставка'].apply(lambda x: len(x))
-# df_curr2 = df_curr2.reindex(df_curr2.sort_values(by=['дата получения', 'count'], ascending=[True, False]).index)
-#
-# ####
-# # set1 = df['шт'].count()
-# df_dep.loc[:, 'шт'] = df_dep.loc[:, 'шт'].apply(lambda x: x[0:12])
-#
-# # set2 = df.groupby(['город откуда', 'шт'])['Клиент'].count().sort_values(ascending=False).reset_index()
-# # # print(round((set1 - set2['Клиент'].count()) / set1 * 100, 2), '% конс сборов')
-# # set2 = set2[set2['Клиент'] > 1]  # была консолидация и поэтому > 1
-# # set2 = set2.groupby(['город откуда'])['Клиент'].sum().sort_values(ascending=False).reset_index()
-#
-# set2 = df_dep.groupby(['дата', 'город откуда', 'шт'])['Клиент'].count().sort_values(ascending=False).reset_index()
-# # set2 = set2.groupby(['дата', 'город откуда'])['Клиент'].sum().sort_values(ascending=False).reset_index()
-# set2 = set2.reindex(set2.sort_values(by=['дата', 'Клиент'], ascending=[True, False]).index)
-# print(set2)
-#
-# ##### переделать на адрес сверку, а не клиента
-# # set3 = df.groupby(['дата получения', 'город куда', 'шт'])['Клиент'].count().sort_values(
-# #     ascending=False).reset_index()
-# # set3 = set3[set3['Клиент'] > 1]  # была консолидация и поэтому > 1
-# # # print(set3)
-# # set3 = set3.groupby(['город куда'])['Клиент'].sum().sort_values(ascending=False).reset_index()
-#
-# ####
-#
-# df_dep = df_dep.groupby(by='город откуда')['шт'].count().sort_values(ascending=False).reset_index()
-# df_arr = df_arr.groupby(by='город куда')['шт'].count().sort_values(ascending=False).reset_index()
-# df_dep.rename(columns={'город откуда': 'город'}, inplace=True)
-# df_arr.rename(columns={'город куда': 'город'}, inplace=True)
-#
-# df_pivot = pd.concat([df_dep, df_arr], axis=0)
-# df_pivot = df_pivot.groupby('город')['шт'].sum().sort_values(ascending=False).reset_index()
-#
-# # df_pivot = df_pivot.merge(set2, how='left', left_on='город', right_on='город откуда')
-# # df_pivot.drop('город откуда', axis=1, inplace=True)
-# # df_pivot.rename(columns={'Клиент': 'консолидация сбора'}, inplace=True)
-# #
-# # df_pivot = df_pivot.merge(set3, how='left', left_on='город', right_on='город куда')
-# # df_pivot.drop('город куда', axis=1, inplace=True)
-# # df_pivot.rename(columns={'Клиент': 'консолидация доставки'}, inplace=True)
-#
-#
-# # df = df.loc[:, ['дата', 'шт', 'Клиент', 'город откуда', 'город куда',
-# #                 'дата получения', 'прием', 'доставка']]
-#
-# #######
-#
-# writer = pd.ExcelWriter('calc.xlsx', engine='xlsxwriter')
-# df_pivot.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False) ## общие данные
-# set2.to_excel(writer, sheet_name='итоги2', startrow=0, index=False, header=True) ## консолидация сбора
-# # set3.to_excel(writer, sheet_name='итоги3', startrow=0, index=False, header=True)  ## консолидация доставки
-# # df.to_excel(writer, sheet_name='df', startrow=0, index=False, header=True) ## общий датафрейм
-# # df_curr.to_excel(writer, sheet_name='1', startrow=0, index=False, header=True)  ## сбор по городу
-# # df_curr2.to_excel(writer, sheet_name='2', startrow=0, index=False, header=True) ## доставка по городу
-#
-# workbook = writer.book
-# worksheet = writer.sheets['итоги']
-#
-# format = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
-# worksheet.set_column('A:K', 10, format)
-#
-# header_format = workbook.add_format(
-#     {'bold': True, 'text_wrap': True, 'valign': 'vcenter', 'fg_color': '#D7E4BC',
-#      'align': 'center_across', 'num_format': '#,##0', 'border': 1})
-#
-# for col_num, value in enumerate(df_pivot.columns.values):
-#     worksheet.write(0, col_num, value, header_format)
-#
-# writer.save()
 
 
+###############
+df_pick_group.rename(columns={'город откуда': 'город'}, inplace=True)
+df_deliv_group.rename(columns={'город куда': 'город'}, inplace=True)
+df_all = pd.concat([df_deliv_group, df_pick_group], axis=0)
+df_all = df_all.groupby(['tmp', 'город'])['консолид'].sum().reset_index()
+df_all = df_all.reindex(df_all.sort_values(by=['tmp', 'консолид'], ascending=[True, False]).index)
+
+
+###  кол-во курьеров на сборе
+df_curr = df_pick.pivot_table(index=['tmp', 'город откуда'], values=['прием'], aggfunc={'прием': set}).reset_index()
+df_curr.loc[:, 'count'] = df_curr.loc[:, 'прием'].apply(lambda x: len(x))
+df_curr = df_curr.reindex(df_curr.sort_values(by=['tmp', 'count'], ascending=[True, False]).index)
+
+###  кол-во курьеров на доставке
+df_curr2 = df_deliv.pivot_table(index=['tmp', 'город куда'], values=['доставка'],aggfunc={'доставка': set}).reset_index()
+df_curr2.loc[:, 'count'] = df_curr2.loc[:, 'доставка'].apply(lambda x: len(x))
+df_curr2 = df_curr2.reindex(df_curr2.sort_values(by=['tmp', 'count'], ascending=[True, False]).index)
+
+###  кол-во курьеров итого
+df_curr.rename(columns={'город откуда': 'город', 'прием':'set1'}, inplace=True)
+df_curr2.rename(columns={'город куда': 'город', 'доставка':'set2'}, inplace=True)
+df_curr_all = df_curr.merge(df_curr2, on=['tmp', 'город'])
+df_curr_all['множество'] = df_curr_all.apply(lambda x: x.set1.union(x.set2), axis=1)
+df_curr_all = df_curr_all.loc[:, ['tmp', 'город', 'множество']]
+
+# df_curr_all['count'] = df_curr_all['множество'].apply(lambda x: len(x))
+df_curr_all.loc[:, 'count'] = df_curr_all.loc[:, 'множество'].apply(lambda x: len(x)-1 if 'nan' in x else len(x))
+
+
+####  выработка на курьера
+df_all = df_all.merge(df_curr_all, on=['tmp', 'город'])
+
+#####
 writer = pd.ExcelWriter('test.xlsx', engine='xlsxwriter')
 df_pick.to_excel(writer, sheet_name='сбор', startrow=1, index=False, header=False)  ## общие данные
 df_pick_group.to_excel(writer, sheet_name='сбор_с консолид', startrow=0, index=False, header=True)
 df_deliv.to_excel(writer, sheet_name='доставка', startrow=0, index=False, header=True)
 df_deliv_group.to_excel(writer, sheet_name='доставка_с консолид', startrow=0, index=False, header=True)
+df_all.to_excel(writer, sheet_name='стопы', startrow=0, index=False, header=True)
+df_curr.to_excel(writer, sheet_name='курьеры сборы', startrow=0, index=False, header=True)
+df_curr2.to_excel(writer, sheet_name='курьеры доставка', startrow=0, index=False, header=True)
+df_curr_all.to_excel(writer, sheet_name='курьеры total', startrow=0, index=False, header=True)
+
 workbook = writer.book
 worksheet = writer.sheets['сбор']
 
