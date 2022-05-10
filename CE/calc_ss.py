@@ -20,8 +20,9 @@ for file in fullpaths:
             df1 = pd.concat(df1, axis=0).reset_index(drop=True)
             df = pd.concat([df, df1], axis=0)
 
-start = '2022-03-01'
-finish = '2022-03-31'
+start = '2022-04-01'
+finish = '2022-04-30'
+
 rd = 22  # март 2022
 ### лимит на стоп 15 мин
 t = datetime.datetime.strptime('00:15:00', "%H:%M:%S")
