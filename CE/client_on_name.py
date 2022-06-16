@@ -39,6 +39,7 @@ df = df.drop_duplicates(subset=dupl)
 
 df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('M')
 
+
 dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
                     'КАЛИНИНГРАД'],
            'УФО': ['КУРГАН', 'НИЖНЕВАРТОВСК', 'НОВЫЙ УРЕНГОЙ', 'СТЕРЛИТАМАК', 'МАГНИТОГОРСК', 'ОРЕНБУРГ', 'СУРГУТ',
@@ -78,26 +79,29 @@ df.rename(columns={'Дата Cоздания': 'дата',
 df = df[df['деньги'] > 50]
 # df = df[df['ФО'] == 'СЗФО']      ## выбор округа
 
-df_pivot = df.pivot_table(index=['дата', 'Клиент'], values=['деньги', 'шт', 'вес'],
+df_pivot = df.pivot_table(index=['дата', 'ФО', 'Клиент'], values=['деньги', 'шт', 'вес'],
                           aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
 
 df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
+df_m['Дата'] = df_m['Дата'].dt.to_period('M')
+df_pivot = df_pivot.merge(df_m, left_on='дата', right_on='Дата', how='left')
 
-df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x: mounth[str(x)])   ### на рабочий день
 
 df_pivot['деньги р.д.'] = df_pivot['деньги'] / df_pivot['р.д.']
 df_pivot['шт р.д.'] = df_pivot['шт'] / df_pivot['р.д.']
 df_pivot['вес р.д.'] = df_pivot['вес'] / df_pivot['р.д.']
 
-
+df_pivot = df_pivot.drop(['Дата'], axis=1)
+df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index)
+df_pivot = df_pivot[df_pivot['деньги'] > 0]
 ######  этот блок для агрегации всех клиентов
 
 
-df_pivot = df_pivot.groupby('дата').agg(
-    {'Клиент': 'count', 'шт р.д.': 'sum', 'вес р.д.': 'sum', 'деньги': 'sum', 'деньги р.д.': 'sum'})
-df_pivot = df_pivot.reset_index()
-
-print(df_pivot)
+# df_pivot = df_pivot.groupby('дата').agg(
+#     {'Клиент': 'count', 'шт р.д.': 'sum', 'вес р.д.': 'sum', 'деньги': 'sum', 'деньги р.д.': 'sum'})
+# df_pivot = df_pivot.reset_index()
+#
+# print(df_pivot)
 
 
 writer = pd.ExcelWriter('clients.xlsx', engine='xlsxwriter')
@@ -107,9 +111,9 @@ workbook = writer.book
 worksheet = writer.sheets['итоги']
 
 format1 = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
-worksheet.set_column('A:B', 10, format1)
-worksheet.set_column('B:C', 65, format1)
-worksheet.set_column('C:I', 15, format1)
+worksheet.set_column('A:C', 10, format1)
+worksheet.set_column('C:D', 65, format1)
+worksheet.set_column('D:J', 15, format1)
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 
