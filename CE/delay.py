@@ -10,19 +10,19 @@ fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
 pd.options.display.float_format = '{:,.0F}'.format
 
 for file in fullpaths:
+	print(file)
 	df1 = pd.read_excel(file, header=2, sheet_name=None)
 	df1 = pd.concat(df1, axis=0).reset_index(drop=True)
 	df = pd.concat([df, df1], axis=0)
 
-# df = df.dropna(how='any', axis=0)
 
 dirname = 'data/day_of_month.xlsx'
 df_m = pd.read_excel(dirname)
 df_m.reset_index()
 mounth = {}
 
-for i in df_m.index:
-	mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
+# for i in df_m.index:
+# 	mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
 df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('D')
 
@@ -118,7 +118,7 @@ df = df[df['деньги'] > 50]
 # df = df[df['ФО'] == 'ЦФО']
 # df = df[df['Режим доставки'] == 'ЭКСПРЕСС']
 # df = df[df['Вид доставки'] == 'Местная']
-df = df[df['Клиент'] == 'ООО "РОКВУЛ"']
+# df = df[df['Клиент'] == 'ООО "Петролеум Трейдинг"']
 
 #
 
@@ -134,6 +134,8 @@ df['delta_get'] = df['delta_get'].dt.components.days
 
 df1 = df[df['delta_delivery'] > 0]
 df1 = df1.reset_index()
+
+# df1 = df.reset_index()
 df1.drop(columns=['index', 'Режим доставки', 'Скидка', 'Вид доставки', 'Получатель.Адрес',
                   'Заказ.Клиент.Не применять топливную надбавку', 'Отправитель.Дата приема у отправителя',
                   'Дата dead-line приема отправления', 'Заказ.Дата и время доставки',
@@ -142,6 +144,8 @@ print(round((df1['delta_delivery'].shape[0] / num_start) * 100, 2), '%', 'нар
 
 df2 = df[df['delta_get'] > 0]
 df2 = df2.reset_index()
+
+# df2 = df.reset_index()
 df2.drop(columns=['index', 'Режим доставки', 'Скидка', 'Вид доставки', 'Получатель.Адрес',
                   'Заказ.Клиент.Не применять топливную надбавку', 'Отправитель.Дата приема у отправителя',
                   'Дата dead-line приема отправления', 'Заказ.Дата и время доставки',

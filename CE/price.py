@@ -5,6 +5,7 @@ import requests
 import pickle
 import math
 from pandas.api.types import CategoricalDtype
+import time
 
 token = '25945DB021CBCB00A59775B430B5B8BC'
 
@@ -130,7 +131,7 @@ def mod(arg):
     else:
         return 'ПРОЧИЕ'
 
-
+df['Режим доставки'] = df['Режим доставки'].astype(str)
 df['Режим'] = df['Режим доставки'].apply(mod)
 df['Режим'] = df['Режим'].astype('category')
 
@@ -253,12 +254,16 @@ df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Пол
                          'Общая стоимость со скидкой', 'price']].apply(
     old_2, axis=1)
 
-# df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
-#     tarif, axis=1)
+start_time = time.time()
 
-print(len(price_dict))
+df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(
+    tarif, axis=1)
 
-print('Кол-во строк:', df.shape[0])
+print('размер словаря:', len(price_dict))
+s = time.time() - start_time
+print("---", s/60/60, " часов ---")
+
+# print('Кол-во строк:', df.shape[0])
 
 
 ######### частота направлений
@@ -313,16 +318,24 @@ df = df[df['price'] != -1]
 df = df[df['price'] != 'нет тарифа']
 
 df['price'] = df['price'] * df['tn']
+df['price'] = df['price'].astype('float64')
 
 df = df[df['price'] > 0]
 
 df['discount'] = (df['Общая стоимость со скидкой'] / df['price']) - 1
 
-df_group = df.groupby(['ФО', 'Клиент'])[['Общая стоимость со скидкой', 'price']].agg(
-    {'Общая стоимость со скидкой': 'sum', 'price': 'sum'})
+# df_group = df.groupby(['ФО', 'Клиент'])[['Общая стоимость со скидкой', 'price']].agg(
+#     {'Общая стоимость со скидкой': 'sum', 'price': 'sum'})
+# df_group = df_group[df_group['Общая стоимость со скидкой'] > 0]
+# df_group = df_group.reset_index()
+# df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
+
+df_group = df.pivot_table(index=['ФО', 'Клиент'], values=['Общая стоимость со скидкой', 'price'], aggfunc=np.sum, margins=True).reset_index()
 df_group = df_group[df_group['Общая стоимость со скидкой'] > 0]
-df_group = df_group.reset_index()
+df_group = df_group.reindex(df_group.sort_values(by=['Общая стоимость со скидкой'], ascending=[False]).index)
 df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
+
+
 
 df = df.loc[:,
      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
@@ -338,7 +351,7 @@ writer = pd.ExcelWriter('цены.xlsx', engine='xlsxwriter')
 
 df.to_excel(writer, sheet_name='итоги', startrow=1, index=False, header=False)
 df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
-df_group.to_excel(writer, sheet_name='группировка', startrow=1, index=False, header=False)
+df_group.to_excel(writer, sheet_name='группировка', startrow=0, index=False, header=True)
 df_dict.to_excel(writer, sheet_name='популярность', startrow=1, index=False)
 
 workbook = writer.book

@@ -18,8 +18,8 @@ df_m = pd.read_excel(dirname)
 df_m.reset_index()
 mounth = {}
 
-for i in df_m.index:
-	mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
+# for i in df_m.index:
+# 	mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
 df['Дата Cоздания'] = df['Дата Cоздания'].dt.to_period('D')
 

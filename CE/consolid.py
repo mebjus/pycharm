@@ -27,9 +27,9 @@ for i in df_m.index:
     mounth[df_m.iloc[i]['Дата']] = df_m.iloc[i]['р.д.']
 
 
-# def todate(arg):
-#     arg = pd.to_datetime(arg)
-#     return arg.strftime('%Y-%m-%d')
+def todate(arg):
+    arg = pd.to_datetime(arg)
+    return arg.strftime('%Y-%m-%d')
 #
 #
 def todate1(arg):
@@ -81,29 +81,32 @@ print('Кол стопов: {:,.0F}'.format(count_stop))
 count_rd = df_or['дата'].apply(todate1).reset_index()
 count_rd = count_rd.groupby('дата').sum()
 count_rd = count_rd.reset_index()
-count_rd['р.д.'] = count_rd['дата'].apply(lambda x: mounth[str(x)])
 
+print(count_rd)
 
-print('Сумма деньги: {:,.0F}'.format((df_inner['деньги'].sum() + df_or['деньги'].sum())/2))
-print('Расчетный вес: {:,.0F}'.format((df_inner['Расчетный вес'].sum() + df_or['Расчетный вес'].sum())/2))
-
-
-df = pd.Series({'Количество отправлений': count_all, 'Количество стопов': count_stop,
-                'Количество рд': count_rd['р.д.'][0]})
-
-print('Количество рд', count_rd['р.д.'][0])
-
-
-##################### сохраняем в файл
-
-# writer = pd.ExcelWriter('consolid.xlsx', engine='xlsxwriter')
+# count_rd['р.д.'] = count_rd['дата'].apply(lambda x: mounth[str(x)])
 #
-# df.to_excel(writer, sheet_name='итоги', header=False, index=True)
-# df_cons_dep.to_excel(writer, sheet_name='отправлено из Мск', index=False)  # index=False header=False
-# df_cons_arr.to_excel(writer, sheet_name='доставлено в Мск', index=False)
 #
-# df_or.to_excel(writer, sheet_name='отправитель_получатель', index=False)  # index=False header=False
-# df_inner.to_excel(writer, sheet_name='из Мск в Мск', index=False)
+# print('Сумма деньги: {:,.0F}'.format((df_inner['деньги'].sum() + df_or['деньги'].sum())/2))
+# print('Расчетный вес: {:,.0F}'.format((df_inner['Расчетный вес'].sum() + df_or['Расчетный вес'].sum())/2))
 #
-# workbook = writer.book
-# writer.save()
+#
+# df = pd.Series({'Количество отправлений': count_all, 'Количество стопов': count_stop,
+#                 'Количество рд': count_rd['р.д.'][0]})
+#
+# print('Количество рд', count_rd['р.д.'][0])
+
+
+#################### сохраняем в файл
+
+writer = pd.ExcelWriter('consolid.xlsx', engine='xlsxwriter')
+
+df.to_excel(writer, sheet_name='итоги', header=False, index=True)
+df_cons_dep.to_excel(writer, sheet_name='отправлено из Мск', index=False)  # index=False header=False
+df_cons_arr.to_excel(writer, sheet_name='доставлено в Мск', index=False)
+
+df_or.to_excel(writer, sheet_name='отправитель_получатель', index=False)  # index=False header=False
+df_inner.to_excel(writer, sheet_name='из Мск в Мск', index=False)
+
+workbook = writer.book
+writer.save()

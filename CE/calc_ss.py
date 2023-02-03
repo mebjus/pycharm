@@ -20,10 +20,10 @@ for file in fullpaths:
             df1 = pd.concat(df1, axis=0).reset_index(drop=True)
             df = pd.concat([df, df1], axis=0)
 
-start = '2021-03-01'
-finish = '2021-03-31'
+start = '2022-12-01'
+finish = '2022-12-31'
 
-rd = 22  # март 2022
+rd = 22  # декабрь 2022
 ### лимит на стоп 15 мин
 t = datetime.datetime.strptime('00:15:00', "%H:%M:%S")
 td2 = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
@@ -155,6 +155,6 @@ df_all.to_excel(writer, sheet_name='стопы', startrow=0, index=False, header
 df_curr.to_excel(writer, sheet_name='курьеры сборы', startrow=0, index=False, header=True)
 df_curr2.to_excel(writer, sheet_name='курьеры доставка', startrow=0, index=False, header=True)
 df_curr_all.to_excel(writer, sheet_name='курьеры total', startrow=0, index=False, header=True)
-
+#
 workbook = writer.book
 writer.save()

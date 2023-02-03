@@ -76,11 +76,18 @@ df.rename(columns={'Дата Cоздания': 'дата',
 
 # отбрасываем все нулевки, консолидированные сборы, дешевые доборы
 
-df = df[df['деньги'] > 50]
-# df = df[df['ФО'] == 'СЗФО']      ## выбор округа
+# df = df[df['деньги'] > 50]
+# df = df[df['ФО'] == 'СФО']      ## выбор округа
 
 df_pivot = df.pivot_table(index=['дата', 'ФО', 'Клиент'], values=['деньги', 'шт', 'вес'],
                           aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
+
+### c видом доставки
+
+# df_pivot = df.pivot_table(index=['дата', 'ФО', 'Клиент', 'Вид доставки'], values=['деньги', 'шт', 'вес'],
+#                           aggfunc={'деньги': sum, 'шт': len, 'вес': sum})
+
+
 
 df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index).reset_index()
 df_m['Дата'] = df_m['Дата'].dt.to_period('M')
@@ -92,16 +99,19 @@ df_pivot['шт р.д.'] = df_pivot['шт'] / df_pivot['р.д.']
 df_pivot['вес р.д.'] = df_pivot['вес'] / df_pivot['р.д.']
 
 df_pivot = df_pivot.drop(['Дата'], axis=1)
-df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[True, False]).index)
+df_pivot = df_pivot.reindex(df_pivot.sort_values(by=['дата', 'деньги'], ascending=[False, False]).index)
 df_pivot = df_pivot[df_pivot['деньги'] > 0]
 ######  этот блок для агрегации всех клиентов
 
-
-# df_pivot = df_pivot.groupby('дата').agg(
+# df_pivot = df_pivot.groupby(['дата', 'ФО']).agg(
 #     {'Клиент': 'count', 'шт р.д.': 'sum', 'вес р.д.': 'sum', 'деньги': 'sum', 'деньги р.д.': 'sum'})
 # df_pivot = df_pivot.reset_index()
-#
-# print(df_pivot)
+
+# df_pivot = df_pivot.groupby(['дата', 'ФО']).agg(
+#     {'шт р.д.': 'sum'})
+# df_pivot = df_pivot.reset_index()
+
+print(df_pivot)
 
 
 writer = pd.ExcelWriter('clients.xlsx', engine='xlsxwriter')
