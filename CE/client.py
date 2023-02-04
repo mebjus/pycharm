@@ -117,12 +117,12 @@ df_pivot['р.д.'] = df_pivot['дата'].apply(lambda x : mounth[str(x)])
 #
 
 
-dirname = 'скидка.xlsx'
-df_total = pd.read_excel(dirname)
-df_total.reset_index()
+# dirname = 'скидка.xlsx'
+# df_total = pd.read_excel(dirname)
+# df_total.reset_index()
 
-df_pivot = df_pivot.merge(df_total, how='left', on='Клиент')
-df_pivot.drop(['паблик', 'цена', 'ФО_y'], axis=1, inplace=True)
+#df_pivot = df_pivot.merge(df_total, how='left', on='Клиент')
+#df_pivot.drop(['паблик', 'цена', 'ФО_y'], axis=1, inplace=True)
 
 ### закрепленный прайс лист
 dirname = 'data/hold_price.xls'

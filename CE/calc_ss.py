@@ -23,6 +23,8 @@ for file in fullpaths:
 start = '2022-12-01'
 finish = '2022-12-31'
 
+print(df)
+
 rd = 22  # декабрь 2022
 ### лимит на стоп 15 мин
 t = datetime.datetime.strptime('00:15:00', "%H:%M:%S")
