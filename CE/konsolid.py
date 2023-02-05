@@ -20,8 +20,8 @@ for file in fullpaths:
             df1 = pd.concat(df1, axis=0).reset_index(drop=True)
             df = pd.concat([df, df1], axis=0)
 
-start = '2022-12-01'
-finish = '2022-12-31'
+start = '2023-01-01'
+finish = '2023-01-31'
 #
 print(df)
 
@@ -148,7 +148,7 @@ df_all = df_all.loc[:, ['tmp', 'город', 'консолид', 'count', 'ст�
 df_all.rename(columns={'tmp': 'дата', 'консолид': 'сбор+доставка', 'count': 'N курьеров'}, inplace=True)
 
 #####
-writer = pd.ExcelWriter('test.xlsx', engine='xlsxwriter')
+writer = pd.ExcelWriter('data/консолидация.xlsx', engine='xlsxwriter')
 df_pick.to_excel(writer, sheet_name='сбор', startrow=0, index=False, header=True)  ## общие данные
 df_pick_group.to_excel(writer, sheet_name='сбор_с консолид', startrow=0, index=False, header=True)
 df_deliv.to_excel(writer, sheet_name='доставка', startrow=0, index=False, header=True)

@@ -99,7 +99,7 @@ print(count_rd)
 
 #################### сохраняем в файл
 
-writer = pd.ExcelWriter('consolid.xlsx', engine='xlsxwriter')
+writer = pd.ExcelWriter('data/tst.xlsx', engine='xlsxwriter')
 
 df.to_excel(writer, sheet_name='итоги', header=False, index=True)
 df_cons_dep.to_excel(writer, sheet_name='отправлено из Мск', index=False)  # index=False header=False
