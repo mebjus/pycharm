@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
-# import matplotlib.pyplot as plt
-# import seaborn as sns
+import matplotlib.pyplot as plt
+import seaborn as sns
 import os
 from pandas.api.types import CategoricalDtype
-# import matplotlib.pyplot as plt
-# import matplotlib.ticker as ticker
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 df = pd.DataFrame
 dirname = 'data/kis/'
@@ -71,6 +71,26 @@ df['Группа вес'] = pd.cut(df['Расчетный вес'], bins=[0, 0.5
 	labels=['0-0.5', '0.5-1', '1-5', '5-30', '30-100', '100+'], right=False)
 df['Группа вес'] = df['Группа вес'].astype('category')
 
+
+def mod(arg):
+    if arg.find('ЭКСПРЕСС') != -1:
+        return 'ЭКСПРЕСС'
+    elif arg.find('ПРАЙМ') != -1:
+        return 'ПРАЙМ'
+    elif arg.find('ОПТИМА') != -1:
+        return 'ОПТИМА'
+    else:
+        return 'ПРОЧИЕ'
+
+
+df['Режим доставки'] = df['Режим доставки'].apply(mod)
+df['Режим доставки'] = df['Режим доставки'].astype('category')
+
+## установить порядок в по режиму
+cat_type = CategoricalDtype(categories=['ПРАЙМ', 'ЭКСПРЕСС', 'ОПТИМА'], ordered=True)
+df['Режим доставки'] = df['Режим доставки'].astype(cat_type)
+
+
 ## установить порядок в по весам
 cat_type = CategoricalDtype(categories=['0-0.5', '0.5-1', '1-5', '5-30', '30-100', '100+'], ordered=True)
 df['Группа вес'] = df['Группа вес'].astype(cat_type)
@@ -84,12 +104,24 @@ df_w.drop([('len', 'вес')], axis=1, inplace=True)
 df_w['средний чек'] = df_w[('sum', 'деньги')]/df_w[('len', 'деньги')]
 df_w['средний кг'] = df_w[('sum', 'деньги')]/df_w[('sum', 'вес')]
 df_w.rename(columns={('len'):('кол-во')}, inplace=True)
+##### по режимам доставки
+df_r = df.copy()
 
+df_diagr = df_r.pivot_table(values=['деньги', 'вес'], index=['Режим доставки'], aggfunc=[np.sum, len])
+fig, ax = plt.subplots(nrows=2, ncols=1)
+fig.suptitle('деньги / вес')
+ax[0].pie(df_diagr[('sum', 'деньги')], labels=df_diagr.index)
+ax[1].pie(df_diagr[('sum', 'вес')], labels=df_diagr.index)
+
+plt.show()
+
+df_r = df_r.pivot_table(values=['деньги', 'вес'], index=['ФО','Режим доставки'], aggfunc=[np.sum, len], margins=True)
+df_r.drop([('len', 'вес')], axis=1, inplace=True)
+df_r.rename(columns={('len'):('кол-во')}, inplace=True)
 
 ####################
 writer = pd.ExcelWriter('data/итоги месяца.xlsx', engine='xlsxwriter')
 df_w.to_excel(writer, sheet_name='итоги', index=True, header=True)
+df_r.to_excel(writer, sheet_name='режим доставки', index=True, header=True)
 workbook = writer.book
-worksheet = writer.sheets['итоги']
-
 writer.save()
