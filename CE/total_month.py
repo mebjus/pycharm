@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 import os
 from pandas.api.types import CategoricalDtype
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
+# import matplotlib.pyplot as plt
+# import matplotlib.ticker as ticker
 
 df = pd.DataFrame
 dirname = 'data/kis/'
@@ -76,14 +76,19 @@ cat_type = CategoricalDtype(categories=['0-0.5', '0.5-1', '1-5', '5-30', '30-100
 df['Группа вес'] = df['Группа вес'].astype(cat_type)
 df.rename(columns={'Дата Cоздания' : 'дата', 'Номер отправления' : 'шт', 'Общая стоимость со скидкой' : 'деньги',
 	'Расчетный вес':'вес'}, inplace=True)
-# print(df.info())
-df = df.pivot_table(values=['деньги'], index=['ФО','Группа вес'], aggfunc=[np.sum, len], margins=True)
-df.reset_index()
-df['средний чек'] = df[('sum', 'деньги')]/df[('len', 'деньги')]
-print(df)
+print(df.info())
+##### по группе веса
+df_w = df.copy()
+df_w = df_w.pivot_table(values=['деньги', 'вес'], index=['ФО','Группа вес'], aggfunc=[np.sum, len], margins=True)
+df_w.drop([('len', 'вес')], axis=1, inplace=True)
+df_w['средний чек'] = df_w[('sum', 'деньги')]/df_w[('len', 'деньги')]
+df_w['средний кг'] = df_w[('sum', 'деньги')]/df_w[('sum', 'вес')]
+df_w.rename(columns={('len'):('кол-во')}, inplace=True)
+
+
 ####################
-writer = pd.ExcelWriter('data/23.xlsx', engine='xlsxwriter')
-df.to_excel(writer, sheet_name='итоги', index=True, header=True)
+writer = pd.ExcelWriter('data/итоги месяца.xlsx', engine='xlsxwriter')
+df_w.to_excel(writer, sheet_name='итоги', index=True, header=True)
 workbook = writer.book
 worksheet = writer.sheets['итоги']
 
