@@ -1,3 +1,5 @@
+from typing import Tuple, Any
+
 import numpy as np
 import pandas as pd
 import os
@@ -7,9 +9,8 @@ import math
 from pandas.api.types import CategoricalDtype
 import time
 
-token = '25945DB021CBCB00A59775B430B5B8BC'
-
-url = 'https://apitest.cityexpress.ru/v1/25945DB021CBCB00A59775B430B5B8BC/Calculate'
+token = 'B6943005F57A8F24962C9DCC6537FC7F'
+url = 'https://apitest.cityexpress.ru/v1/B6943005F57A8F24962C9DCC6537FC7F/Calculate'
 
 df = pd.DataFrame()
 dirname = 'data/kis/'
@@ -23,9 +24,6 @@ for file in fullpaths:
     df = pd.concat([df, df1], axis=0)
 
 price_dict = {}
-price_freq = {}
-price_freq_money = {}
-price_freq_public = {}
 
 filename = 'data/price.bin'
 with open(filename, 'rb') as f:
@@ -43,16 +41,7 @@ df = df.merge(df_tn, left_on='Дата Cоздания', right_on='Дата', ho
 df['Размер'] = df['Размер'] + 1
 df.drop('Дата', axis=1, inplace=True)
 
-# tn = 1.22
-counter = 0
 
-#
-# ##########   ограничения на веса и стоимость
-# df = df[df['Расчетный вес'] <= 0.25]
-# df = df[df['Общая стоимость со скидкой'] > 220]
-#
-# df = df[df['Общая стоимость со скидкой'] > 0]
-#
 dict_fo = {'СЗФО': ['ВЕЛИКИЙ НОВГОРОД', 'МУРМАНСК', 'ПЕТРОЗАВОДСК', 'СЫКТЫВКАР', 'САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
                     'КАЛИНИНГРАД'],
            'УФО':  ['КУРГАН', 'НИЖНЕВАРТОВСК', 'НОВЫЙ УРЕНГОЙ', 'СТЕРЛИТАМАК', 'МАГНИТОГОРСК', 'ОРЕНБУРГ', 'СУРГУТ',
@@ -75,18 +64,17 @@ city_dict = ['САНКТ-ПЕТЕРБУРГ', 'АРХАНГЕЛЬСК',
 
 ########    выбор по своей географии
 
-def ower_city(row):
-    if str(row).upper() not in city_dict:
-        return np.NAN
-    else:
-        return row
+# def ower_city(row):
+#     if str(row).upper() not in city_dict:
+#         return np.NAN
+#     else:
+#         return row
 #
 #
 # df['Отправитель.Адрес.Город'] = df['Отправитель.Адрес.Город'].apply(ower_city)
 # df['Получатель.Адрес.Город'] = df['Получатель.Адрес.Город'].apply(ower_city)
 # df = df.dropna(how='any', axis=0)
-#
-#
+
 df['Заказ.Клиент.Не применять топливную надбавку'] = df['Заказ.Клиент.Не применять топливную надбавку'].fillna(0)
 
 
@@ -134,53 +122,6 @@ def mod(arg):
 df['Режим доставки'] = df['Режим доставки'].astype(str)
 df['Режим'] = df['Режим доставки'].apply(mod)
 df['Режим'] = df['Режим'].astype('category')
-
-
-def old(row):
-    llst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
-    if llst in price_dict.keys():
-        if price_freq.get(llst) == None: price_freq[llst] = 0
-        if price_freq_money.get(llst) == None: price_freq_money[llst] = 0
-        price_freq[llst] += 1
-        print(llst, ':', 'есть')
-        if price_dict[llst] != 'нет тарифа': price_freq_money[llst] += row['Общая стоимость со скидкой']
-        return price_dict[llst]
-    else:
-        return -1
-
-
-def old_2(row):
-    llst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
-    if price_freq_public.get(llst) == None: price_freq_public[llst] = 0
-    if llst in price_dict.keys():
-        if row['price'] != 'нет тарифа':
-            price_freq_public[llst] += row['price']
-        return price_dict[llst]
-    else:
-        return -1
-
-def tarif(row):
-    global counter
-    if row['Отправитель.Адрес.Город'] == 'Горское п, Выборгский р-н': return 0  # исключение ошибки
-    llst = (row['Отправитель.Адрес.Город'], row['Получатель.Адрес.Город'], row['вес'], row['Режим доставки'])
-    row['Режим доставки'] = row['Режим доставки'].upper().strip()
-    if llst in price_dict.keys(): return price_dict[llst]
-    if row['price'] == -1:
-        params = {'cityFrom':       row['Отправитель.Адрес.Город'], 'cityTo': row['Получатель.Адрес.Город'],
-                  'physicalWeight': row['вес'], 'name': row['Режим доставки'], 'quantity': '1', 'width': '5',
-                  'height':         '5',
-                  'length':         '5'}
-        response = requests.get(url, params=params)
-        for i in response.json()['Result']:
-            if i['Name'].upper() == row['Режим доставки']:
-                counter += 1
-                print(counter, ':', llst, ':', round(i['TotalPrice'], 1))
-                price_dict[llst] = i['TotalPrice']
-                return i['TotalPrice']
-    counter += 1
-    price_dict[llst] = 'нет тарифа'
-    print(counter, ':', llst, ':', 'нет тарифа')
-    return 'нет тарифа'
 
 
 def round_custom(num, step):
@@ -245,142 +186,62 @@ df['вес'] = df.loc[:, ['Вид доставки', 'Расчетный вес'
                        'Получатель.Адрес.Город']].apply(weight, axis=1)
 
 
+# def check(row):
+#     row = tuple(row)
+#     if row in price_dict.keys():
+#         return price_dict.get(row)
 
-df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки',
-                         'Общая стоимость со скидкой']].apply(old, axis=1)
-df['price'] = df['price'].fillna(0)
-df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки',
-                         'Общая стоимость со скидкой', 'price']].apply(old_2, axis=1)
+# df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки']].apply(check, axis=1)
 
-# start_time = time.time()
+def get_a_price(row):
+    if row['Отправитель.Адрес.Город'] == 'Горское п, Выборгский р-н': return 0  # исключение ошибки
 
-df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки', 'price']].apply(tarif, axis=1)
-#
-# print('размер словаря:', len(price_dict))
-# s = time.time() - start_time
-# print("---", s/60/60, " часов ---")
-#
-# # print('Кол-во строк:', df.shape[0])
-#
-#
-# ######### частота направлений
-# sorted_dict = {}
-# sorted_dict_money = {}
-# sorted_dict_money_public = {}
-#
-# sorted_keys = sorted(price_freq, key=price_freq.get, reverse=True)
-# sorted_keys_money = sorted(price_freq_money, key=price_freq_money.get, reverse=True)
-# sorted_keys_money_public = sorted(price_freq_public, key=price_freq_public.get, reverse=True)
-#
-# for w in sorted_keys:
-#     sorted_dict[w] = price_freq[w]
-# for w in sorted_keys_money:
-#     sorted_dict_money[w] = price_freq_money[w]
-# for w in sorted_keys_money_public:
-#     sorted_dict_money_public[w] = price_freq_public[w]
-#
-# df_dict = pd.DataFrame(sorted_dict.items(), columns=['Кортеж', 'Кол отправлений'])
-# df_dict_money = pd.DataFrame(sorted_dict_money.items(), columns=['Кортеж', 'Продали'])
-#
-# df_dict_money_public = pd.DataFrame(sorted_dict_money_public.items(), columns=['Кортеж', 'Паблик'])
-#
-# df_dict['Кол отправлений'].dropna(inplace=True)
-# df_dict_money['Продали'].dropna(inplace=True)
-# df_dict_money_public['Паблик'].dropna(inplace=True)
-#
-# df_dict = df_dict.merge(df_dict_money, how='left')
-# df_dict = df_dict.merge(df_dict_money_public, how='left')
-#
-# df_dict = df_dict[df_dict['Кол отправлений'] > 0]
+    row['Режим доставки'] = row['Режим доставки'].upper().strip()
+    row = tuple(row)
 
-# ###### очистить "нет тарифа"
-#
-# # dict_new = {}
-# # for i, j in price_dict.items():
-# # 	if j != 'нет тарифа':
-# # 		# print(i, j)
-# # 		dict_new[i] = j
-# # price_dict = dict_new.copy()
-# # print(len(price_dict))
-# # #######
+    if row in price_dict.keys():
+        print(row, '=', price_dict.get(row))
+        return price_dict.get(row)
 
-f = open('price.bin', 'wb')
+    params = {'cityFrom':row[0],'cityTo':row[1],'physicalWeight':row[2],'name':row[3],'quantity':'1','width':'5',
+              'height':'5', 'length':'5'}
+    response = requests.get(url, params=params)
+
+    for i in response.json()['Result']:
+        if i['Name'].upper() == row[3]:
+            price_dict[row] = i['TotalPrice']
+            print(row, '+', i['TotalPrice'])
+            return i['TotalPrice']
+
+    price_dict[row] = 'нет тарифа'
+    print(row, '+', 'нет тарифа')
+    return 'нет тарифа'
+
+
+start_time = time.time()
+
+df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки']].apply(get_a_price, axis=1)
+
+print('размер словаря:', len(price_dict))
+s = time.time() - start_time
+print("---", s/60, " минут ---")
+print('Кол-во строк:', df.shape[0])
+
+f = open('data/price.bin', 'wb')
 pickle.dump(price_dict, f)
 f.close()
-
-# df1 = df[df['price'] == -1]
-# df2 = df[df['price'] == 'нет тарифа']
-#
-# df = df[df['price'] != -1]
-# df = df[df['price'] != 'нет тарифа']
-#
-# df['price'] = df['price'] * df['tn']
-# df['price'] = df['price'].astype('float64')
-#
-# df = df[df['price'] > 0]
-#
-# df['discount'] = (df['Общая стоимость со скидкой'] / df['price']) - 1
-
-# # df_group = df.groupby(['ФО', 'Клиент'])[['Общая стоимость со скидкой', 'price']].agg(
-# #     {'Общая стоимость со скидкой': 'sum', 'price': 'sum'})
-# # df_group = df_group[df_group['Общая стоимость со скидкой'] > 0]
-# # df_group = df_group.reset_index()
-# # df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
-#
-# df_group = df.pivot_table(index=['ФО', 'Клиент'], values=['Общая стоимость со скидкой', 'price'], aggfunc=np.sum, margins=True).reset_index()
-# df_group = df_group[df_group['Общая стоимость со скидкой'] > 0]
-# df_group = df_group.reindex(df_group.sort_values(by=['Общая стоимость со скидкой'], ascending=[False]).index)
-# df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
-
-
-
-# df = df.loc[:,
-#      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
-#       'вес', 'Режим доставки', 'Вид доставки',
-#       'Общая стоимость со скидкой', 'price', 'tn', 'discount']]
-#
-# df2 = df2.loc[:,
-#       ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
-#        'вес', 'Режим доставки', 'Вид доставки',
-#        'Общая стоимость со скидкой', 'price', 'tn']]
 
 
 df = df.loc[:,
      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
       'вес', 'Режим доставки', 'Вид доставки',
       'Общая стоимость со скидкой', 'price', 'tn']]
+# df1 = df[['price'] != 'нет тарифа']
+# df2 = df[['price'] == 'нет тарифа']
 
 writer = pd.ExcelWriter('data/цены.xlsx', engine='xlsxwriter')
-#
 df.to_excel(writer, sheet_name='итоги', index=True, header=True)
-# df2.to_excel(writer, sheet_name='не определен', startrow=1, index=False, header=False)
-# df_group.to_excel(writer, sheet_name='группировка', startrow=0, index=False, header=True)
-# df_dict.to_excel(writer, sheet_name='популярность', startrow=1, index=False)
-#
+# df1.to_excel(writer, sheet_name='итоги', index=True, header=True)
+# df2.to_excel(writer, sheet_name='нет тарифа', index=True, header=True)
 workbook = writer.book
-#
-# worksheet = writer.sheets['итоги']
-# worksheet2 = writer.sheets['популярность']
-# worksheet3 = writer.sheets['не определен']
-# worksheet4 = writer.sheets['популярность']
-#
-# format = workbook.add_format({'border': 1, 'bg_color': '#E8FBE1', 'num_format': '#,##0'})
-# worksheet4.set_column('A:B', 50, format)
-# worksheet4.set_column('B:D', 15, format)
-#
-# worksheet4.add_table(0, 0, df_dict.shape[0], 3, {'first_column': False, 'style': None})
-#
-# header_format = workbook.add_format({
-#     'bold':       True,
-#     'text_wrap':  True,
-#     'valign':     'vcenter',
-#     'fg_color':   '#D7E4BC',
-#     'align':      'center_across',
-#     'num_format': '#,##0',
-#     'border':     1})
-#
-# for col_num, value in enumerate(df.columns.values):
-#     worksheet.write(0, col_num, value, header_format)
-# # for col_num, value in enumerate(df_dict.columns.values):
-# # 	worksheet4.write(0, col_num, value, header_format)
 writer.save()
