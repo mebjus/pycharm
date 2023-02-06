@@ -199,7 +199,7 @@ simplegeneric==0.8.1
 singledispatch @ file:///tmp/build/80754af9/singledispatch_1614366001199/work
 six @ file:///opt/concourse/worker/volumes/live/5b31cb27-1e37-4ca5-6e9f-86246eb206d2/volume/six_1605205320872/work
 sniffio @ file:///opt/concourse/worker/volumes/live/1faeb672-6d3f-4f1f-7861-294fcf282962/volume/sniffio_1614030462215/work
-snowballstemmer @ file:///tmp/build/80754af9/snowballstemmer_1611258885636/work
+snowballlstemmer @ file:///tmp/build/80754af9/snowballlstemmer_1611258885636/work
 sortedcollections @ file:///tmp/build/80754af9/sortedcollections_1611172717284/work
 sortedcontainers @ file:///tmp/build/80754af9/sortedcontainers_1606865132123/work
 soupsieve @ file:///tmp/build/80754af9/soupsieve_1616183228191/work

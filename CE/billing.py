@@ -78,9 +78,9 @@ df = df[df['delay'] > 1]
 finish = df.shape[0]/start
 print('просроченных=', round(finish*100, 2), '%')
 
-lst = ['Статус счета','Статус оплаты счета','week','Сумма с учетом НДС', 'Клиент.Подразделение.Адрес.Город', 'Дата счета']
-df.drop(columns=lst, axis=1, inplace=True)
-df1.drop(columns=lst, axis=1, inplace=True)
+llst = ['Статус счета','Статус оплаты счета','week','Сумма с учетом НДС', 'Клиент.Подразделение.Адрес.Город', 'Дата счета']
+df.drop(columns=llst, axis=1, inplace=True)
+df1.drop(columns=llst, axis=1, inplace=True)
 
 df = df.sort_values(by=['Клиент', 'Оплатить до'], ascending=[True, True])
 df1 = df1.sort_values(by=['Клиент', 'Оплатить до'], ascending=[True, True])

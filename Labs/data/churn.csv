@@ -514,7 +514,7 @@ RowNumber,CustomerId,Surname,CreditScore,Geography,Gender,Age,Tenure,Balance,Num
 513,15782236,Gibbs,735,Spain,Male,34,5,0,2,0,0,71095.41,0
 514,15593601,Isayev,734,France,Male,34,6,133598.4,1,1,1,13107.24,0
 515,15682048,Pisano,605,France,Female,51,3,136188.78,1,1,1,67110.59,1
-516,15746902,Belstead,793,Spain,Male,38,9,0,2,1,0,88225.02,0
+516,15746902,Bellstead,793,Spain,Male,38,9,0,2,1,0,88225.02,0
 517,15752081,Vassiliev,468,France,Female,56,10,0,3,0,1,62256.87,1
 518,15781307,Schneider,779,Germany,Male,37,7,120092.52,2,1,0,135925.72,0
 519,15775912,Mazzanti,698,France,Male,48,4,101238.24,2,0,1,177815.87,1
@@ -910,7 +910,7 @@ RowNumber,CustomerId,Surname,CreditScore,Geography,Gender,Age,Tenure,Balance,Num
 909,15754713,Rivera,685,Spain,Male,31,10,135213.71,1,1,1,125777.28,0
 910,15693814,Niu,806,Spain,Male,25,7,0,2,1,0,18461.9,0
 911,15599660,Bennett,604,France,Male,36,6,116229.85,2,1,1,79633.38,0
-912,15746490,Wollstonecraft,648,Spain,Female,53,6,111201.41,1,1,1,121542.29,0
+912,15746490,Wolllstonecraft,648,Spain,Female,53,6,111201.41,1,1,1,121542.29,0
 913,15566091,Thomsen,545,Spain,Female,32,4,0,1,1,0,94739.2,0
 914,15655961,Palermo,756,Germany,Male,27,1,131899,1,1,0,93302.29,0
 915,15710404,Chinwendu,569,France,Male,35,10,124525.52,1,1,1,193793.78,0
@@ -6231,7 +6231,7 @@ RowNumber,CustomerId,Surname,CreditScore,Geography,Gender,Age,Tenure,Balance,Num
 6230,15669741,Hou,777,France,Male,36,7,0,1,1,0,106472.34,0
 6231,15616954,Smith,592,France,Male,71,4,0,2,0,1,17013.54,0
 6232,15729238,Peng,631,Germany,Male,48,1,106396.48,1,1,1,150661.42,1
-6233,15718242,Wollstonecraft,725,Germany,Female,47,1,104887.43,1,0,0,86622.56,1
+6233,15718242,Wolllstonecraft,725,Germany,Female,47,1,104887.43,1,0,0,86622.56,1
 6234,15682914,Bolton,850,France,Male,34,2,72079.71,1,1,1,115767.93,0
 6235,15654274,Corrie,540,France,Male,37,6,0,2,1,0,141998.89,0
 6236,15691457,Boyle,674,Spain,Male,36,2,0,2,1,1,182787.17,0
@@ -7378,7 +7378,7 @@ RowNumber,CustomerId,Surname,CreditScore,Geography,Gender,Age,Tenure,Balance,Num
 7377,15765093,Coates,704,France,Male,23,6,166594.78,1,1,1,155823.2,0
 7378,15592999,Reid,691,France,Female,40,0,115465.98,1,1,1,60622.61,0
 7379,15641715,Ts'ui,599,France,Male,34,8,0,2,1,1,174196.68,0
-7380,15607746,Belstead,573,France,Female,36,1,0,1,1,1,56905.38,0
+7380,15607746,Bellstead,573,France,Female,36,1,0,1,1,1,56905.38,0
 7381,15625311,Dickinson,589,Germany,Female,41,7,92618.62,1,1,1,101178.85,0
 7382,15573077,Nwora,620,Germany,Female,25,8,141825.88,1,1,1,73857.94,1
 7383,15735106,Bishop,647,Spain,Male,28,6,149594.02,2,1,0,102325.19,0

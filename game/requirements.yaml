@@ -273,7 +273,7 @@ dependencies:
   - sip=4.19.8=py38h0a44026_0
   - six=1.15.0=py38hecd8cb5_0
   - sniffio=1.2.0=py38hecd8cb5_1
-  - snowballstemmer=2.1.0=pyhd3eb1b0_0
+  - snowballlstemmer=2.1.0=pyhd3eb1b0_0
   - sortedcollections=2.1.0=pyhd3eb1b0_0
   - sortedcontainers=2.3.0=pyhd3eb1b0_0
   - soupsieve=2.2.1=pyhd3eb1b0_0
