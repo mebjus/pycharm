@@ -153,7 +153,7 @@ df_pick.to_excel(writer, sheet_name='сбор', startrow=0, index=False, header=
 # df_pick_group.to_excel(writer, sheet_name='сбор_с консолид', startrow=0, index=False, header=True)
 df_deliv.to_excel(writer, sheet_name='доставка', startrow=0, index=False, header=True)
 # df_deliv_group.to_excel(writer, sheet_name='доставка_с консолид', startrow=0, index=False, header=True)
-# df_all.to_excel(writer, sheet_name='стопы', startrow=0, index=False, header=True)
+df_all.to_excel(writer, sheet_name='стопы', startrow=0, index=False, header=True)
 # df_curr.to_excel(writer, sheet_name='курьеры сборы', startrow=0, index=False, header=True)
 # df_curr2.to_excel(writer, sheet_name='курьеры доставка', startrow=0, index=False, header=True)
 df_curr_all.to_excel(writer, sheet_name='курьеры total', startrow=0, index=False, header=True)

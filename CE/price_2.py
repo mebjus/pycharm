@@ -16,7 +16,7 @@ df = pd.DataFrame()
 dirname = 'data/kis/'
 dirfiles = os.listdir(dirname)
 fullpaths = map(lambda name: os.path.join(dirname, name), dirfiles)
-pd.options.display.float_format = '{:,.2F}'.format
+pd.options.display.float_format = '{:,.0F}'.format
 
 for file in fullpaths:
     df1 = pd.read_excel(file, header=2, sheet_name=None)
@@ -138,45 +138,41 @@ def weight(row):
         elif (row['Расчетный вес'] > 20):
             return round_custom(row['Расчетный вес'], 1)
 
-    if row['Вид доставки'] == 'Международная': return round_custom(row['Расчетный вес'], 0.5)
+    elif row['Вид доставки'] == 'Международная':
+        return round_custom(row['Расчетный вес'], 0.5)
 
-    if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Москва':
-        if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС':
-            if row['Расчетный вес'] <= 1:
-                return round_custom(row['Расчетный вес'], 0.25)
-            elif row['Расчетный вес'] > 1:
-                return round_custom(row['Расчетный вес'], 1)
-
-    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Москва':
-        if row['Расчетный вес'] <= 1:
+    elif row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Москва':
+        if row['Расчетный вес'] <= 0.5:
+            return round_custom(row['Расчетный вес'], 0.25)
+        elif row['Расчетный вес'] <= 1:
             return round_custom(row['Расчетный вес'], 0.5)
         elif row['Расчетный вес'] > 1:
             return round_custom(row['Расчетный вес'], 1)
 
-    if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
-        if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС':
-            if row['Расчетный вес'] <= 1:
-                return round_custom(row['Расчетный вес'], 0.25)
-            elif row['Расчетный вес'] > 1:
-                return round_custom(row['Расчетный вес'], 1)
-
-    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
-        if row['Расчетный вес'] <= 1: return round_custom(row['Расчетный вес'], 1)
-
-    if row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
-        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
-        if row['Режим'] == 'ПРАЙМ' or row['Режим'] == 'ЭКСПРЕСС' or row['Режим'] == 'ОПТИМА':
-            if row['Расчетный вес'] <= 1:
-                return round_custom(row['Расчетный вес'], 1)
-            elif row['Расчетный вес'] > 1:
-                return round_custom(row['Расчетный вес'], 1)
-
-    if row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
-        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
+    elif row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Москва':
         if row['Расчетный вес'] <= 1:
+            return round_custom(row['Расчетный вес'], 0.5)
+        else:
             return round_custom(row['Расчетный вес'], 1)
+
+    elif row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
+        if row['Расчетный вес'] <= 0.5:
+            return round_custom(row['Расчетный вес'], 0.25)
+        elif row['Расчетный вес'] <= 1:
+            return round_custom(row['Расчетный вес'], 0.5)
         elif row['Расчетный вес'] > 1:
             return round_custom(row['Расчетный вес'], 1)
+
+    elif row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] == 'Санкт-Петербург':
+        return round_custom(row['Расчетный вес'], 1)
+
+    elif row['Вид доставки'] == 'Местная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
+        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
+        return round_custom(row['Расчетный вес'], 1)
+
+    elif row['Вид доставки'] == 'Областная' and row['Отправитель.Адрес.Город'] != 'Москва' and row[
+        'Отправитель.Адрес.Город'] != 'Санкт-Петербург':
+        return round_custom(row['Расчетный вес'], 1)
     return row['Расчетный вес']
 
 
@@ -192,6 +188,14 @@ df['вес'] = df.loc[:, ['Вид доставки', 'Расчетный вес'
 #         return price_dict.get(row)
 
 # df['price'] = df.loc[:, ['Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'вес', 'Режим доставки']].apply(check, axis=1)
+
+##### очистим "нет тарифа"
+# price_dict1={}
+# for i in (price_dict.keys()):
+#     if price_dict[i] != 'нет тарифа':
+#         price_dict1[i] = price_dict[i]
+# price_dict = price_dict1.copy()
+#####
 
 def get_a_price(row):
     if row['Отправитель.Адрес.Город'] == 'Горское п, Выборгский р-н': return 0  # исключение ошибки
@@ -232,16 +236,28 @@ pickle.dump(price_dict, f)
 f.close()
 
 
-df = df.loc[:,
-     ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
-      'вес', 'Режим доставки', 'Вид доставки',
-      'Общая стоимость со скидкой', 'price', 'tn']]
-# df1 = df[['price'] != 'нет тарифа']
-# df2 = df[['price'] == 'нет тарифа']
+# df = df.loc[:,
+#      ['ФО', 'Клиент', 'Номер отправления', 'Отправитель.Адрес.Город', 'Получатель.Адрес.Город', 'Расчетный вес',
+#       'вес', 'Режим доставки', 'Вид доставки',
+#       'Общая стоимость со скидкой', 'price', 'tn']]
 
-writer = pd.ExcelWriter('data/цены.xlsx', engine='xlsxwriter')
-df.to_excel(writer, sheet_name='итоги', index=True, header=True)
+df1 = df[df['price'] != 'нет тарифа']
+df2 = df[df['price'] == 'нет тарифа']
+
+# df1['price'].astype('float64')
+# print(df1.info())
+# df1.loc['price'] = ['price'] * ['tn']
+
+df1['price'] = df1['price'] * df1['tn']
+df1['price'].astype('float64')
+
+df_group = df1.groupby(['ФО', 'Клиент'])[['Общая стоимость со скидкой', 'price']].agg(
+    {'Общая стоимость со скидкой': 'sum', 'price': 'sum'}).reset_index()
+df_group['discount'] = (df_group['Общая стоимость со скидкой'] / df_group['price']) - 1
+
+# writer = pd.ExcelWriter('data/цены.xlsx', engine='xlsxwriter')
 # df1.to_excel(writer, sheet_name='итоги', index=True, header=True)
 # df2.to_excel(writer, sheet_name='нет тарифа', index=True, header=True)
-workbook = writer.book
-writer.save()
+# df_group.to_excel(writer, sheet_name='группировка', index=True, header=True)
+# workbook = writer.book
+# writer.save()

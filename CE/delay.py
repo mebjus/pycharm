@@ -156,7 +156,7 @@ print(round((df2['delta_get'].shape[0] / num_start) * 100, 2), '%', 'наруш�
 
 #######
 
-writer = pd.ExcelWriter('delay.xlsx', engine='xlsxwriter')
+writer = pd.ExcelWriter('data/delay.xlsx', engine='xlsxwriter')
 df1.to_excel(writer, sheet_name='не доставки', startrow=1, index=False, header=False)
 df2.to_excel(writer, sheet_name='не сборы', startrow=1, index=False, header=False)
 

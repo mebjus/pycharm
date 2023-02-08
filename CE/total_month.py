@@ -100,7 +100,7 @@ print(df.info())
 
 ##### по группе веса
 df_w = df.copy()
-df_w = df_w.pivot_table(values=['деньги', 'вес'], index=['дата','ФО','Группа вес'], aggfunc=[np.sum, len])
+df_w = df_w.pivot_table(values=['деньги', 'вес'], index=['ФО','Группа вес'], aggfunc=[np.sum, len])
 df_w.drop([('len', 'вес')], axis=1, inplace=True)
 df_w['средний чек'] = df_w[('sum', 'деньги')]/df_w[('len', 'деньги')]
 df_w['средний кг'] = df_w[('sum', 'деньги')]/df_w[('sum', 'вес')]
@@ -115,7 +115,7 @@ ax[0].pie(df_diagr[('sum', 'деньги')], labels=df_diagr.index, autopct='%1.
 ax[1].pie(df_diagr[('sum', 'вес')], labels=df_diagr.index, autopct='%1.2f%%')
 plt.show()
 
-df_r = df_r.pivot_table(values=['деньги', 'вес'], index=['дата', 'ФО','Режим доставки'], aggfunc=[np.sum, len])
+df_r = df_r.pivot_table(values=['деньги', 'вес'], index=['ФО','Режим доставки'], aggfunc=[np.sum, len])
 df_r.drop([('len', 'вес')], axis=1, inplace=True)
 df_r.rename(columns={('len'):('кол-во')}, inplace=True)
 
