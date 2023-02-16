@@ -99,14 +99,14 @@ print(count_rd)
 
 #################### сохраняем в файл
 
-writer = pd.ExcelWriter('data/tst.xlsx', engine='xlsxwriter')
-
-df.to_excel(writer, sheet_name='итоги', header=False, index=True)
-df_cons_dep.to_excel(writer, sheet_name='отправлено из Мск', index=False)  # index=False header=False
-df_cons_arr.to_excel(writer, sheet_name='доставлено в Мск', index=False)
-
-df_or.to_excel(writer, sheet_name='отправитель_получатель', index=False)  # index=False header=False
-df_inner.to_excel(writer, sheet_name='из Мск в Мск', index=False)
-
-workbook = writer.book
-writer.save()
+# writer = pd.ExcelWriter('data/tst.xlsx', engine='xlsxwriter')
+#
+# df.to_excel(writer, sheet_name='итоги', header=False, index=True)
+# df_cons_dep.to_excel(writer, sheet_name='отправлено из Мск', index=False)  # index=False header=False
+# df_cons_arr.to_excel(writer, sheet_name='доставлено в Мск', index=False)
+#
+# df_or.to_excel(writer, sheet_name='отправитель_получатель', index=False)  # index=False header=False
+# df_inner.to_excel(writer, sheet_name='из Мск в Мск', index=False)
+#
+# workbook = writer.book
+# writer.save()
